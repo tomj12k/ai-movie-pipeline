@@ -1,0 +1,23 @@
+{
+  "_meta_workflow": "ACE-Step 3.5B pure-music generation — minutes of coherent instrumental score in one pass (no video). studio render patches the tags via --style-prompt (title music_tags) and duration is node 5's seconds. Output lands as flac in the project folder via the outputs sync.",
+
+  "1": {"class_type": "CheckpointLoaderSimple", "_meta": {"title": "ace-step 3.5b"},
+        "inputs": {"ckpt_name": "ace_step_v1_3.5b.safetensors"}},
+  "2": {"class_type": "ModelSamplingSD3", "_meta": {"title": "shift"},
+        "inputs": {"model": ["1", 0], "shift": 5.0}},
+  "3": {"class_type": "TextEncodeAceStepAudio", "_meta": {"title": "music_tags"},
+        "inputs": {"clip": ["1", 1], "lyrics": "[instrumental]", "lyrics_strength": 0.99,
+                   "tags": "cinematic electronic film score, instrumental, no vocals, tense pulsing synth intro, sub-bass, slowly building arpeggio, driving percussion build, massive orchestral-synth climax hit, shimmering aftermath, warm hopeful soaring finale, emotional, sci-fi, 90 bpm"}},
+  "4": {"class_type": "ConditioningZeroOut", "_meta": {"title": "negative"},
+        "inputs": {"conditioning": ["3", 0]}},
+  "5": {"class_type": "EmptyAceStepLatentAudio", "_meta": {"title": "120 seconds"},
+        "inputs": {"seconds": 120.0, "batch_size": 1}},
+  "6": {"class_type": "KSampler", "_meta": {"title": "sample"},
+        "inputs": {"model": ["2", 0], "positive": ["3", 0], "negative": ["4", 0],
+                   "latent_image": ["5", 0], "seed": 7, "steps": 50, "cfg": 5.0,
+                   "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}},
+  "7": {"class_type": "VAEDecodeAudio", "_meta": {"title": "decode"},
+        "inputs": {"samples": ["6", 0], "vae": ["1", 2]}},
+  "8": {"class_type": "SaveAudio", "_meta": {"title": "save flac"},
+        "inputs": {"audio": ["7", 0], "filename_prefix": "studio/music_score"}}
+}

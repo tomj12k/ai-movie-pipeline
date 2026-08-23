@@ -307,6 +307,8 @@ def submit_workflow(wf_path, project: str, image=None,
             ins["image"] = img_name
         if style_prompt and title == "style_prompt":
             ins["text"] = style_prompt
+        if style_prompt and title == "music_tags":
+            ins["tags"] = style_prompt
         if motion_prompt and title == "motion_prompt":
             ins["text"] = motion_prompt
         if seed is not None:
