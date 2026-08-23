@@ -4,10 +4,9 @@ A distributed local AI + 3D animation studio across a 1GbE LAN.
 
 | Node | Role | Address |
 |------|------|---------|
-| MacBook Air M3 | Edit cockpit, DaVinci Resolve, studio CLI | (this machine) |
+| MacBook Air M3 | Edit cockpit, DaVinci Resolve, studio CLI, Blender staging | (this machine) |
 | DGX Spark GB10 (128GB unified) | vLLM (Qwen3.8-27B) + ComfyUI (Krea 2, LTX-2.3, Wan 2.2, HunyuanVideo 1.5) | `spark-d1a9.local` |
 | Synology DS423 (4TB) | Shared storage: Active_Projects, AI_Models, Portfolio_Archive | `192.168.68.131` |
-| Windows PC (RTX 3090 Ti) | Blender / Unreal staging — deferred, not wired up yet | — |
 
 ## Design rules
 
@@ -27,6 +26,9 @@ studio/            studio.py — the unified pipeline CLI
 workflows/         ComfyUI API-format graphs (Krea2 → LTX / Wan / Hunyuan)
 docs/RUNBOOK.md    End-to-end production runbook
 ```
+
+Any machine that mounts `Active_Projects` can stage in Blender — the studio
+runs fully on the three nodes above.
 
 ## Quick start
 

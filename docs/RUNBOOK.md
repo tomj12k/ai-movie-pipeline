@@ -1,7 +1,7 @@
 # Production runbook — a 10-second portfolio reel, end to end
 
-One creator, four machines, one wire. Follow the steps in order; every command
-runs on the MacBook Air unless noted.
+One creator, three machines, one wire. Follow the steps in order; every
+command runs on the MacBook Air unless noted.
 
 ## 0. Preflight (30 seconds)
 
@@ -32,11 +32,11 @@ studio code-gen --project neon_hangar
 - The Spark's own Qwen3.8-27B reads the shot list and writes
   `blender_layout.py`: bounding-box geometry per shot, placeholder lights,
   and one 35mm camera keyframed along the full 240-frame track.
-- On the staging machine (any box with Blender): open Blender → Scripting →
-  run `P:\neon_hangar\blender_layout.py` (Windows) or
-  `…/Active_Projects/neon_hangar/blender_layout.py`. Adjust blocking to
-  taste, then render a wireframe/viewport still per shot into the project
-  folder (and export `.blend`/`.usd` there too).
+- On any machine with Blender and the share mounted: open Blender →
+  Scripting → run
+  `~/StudioMounts/Active_Projects/neon_hangar/blender_layout.py`.
+  Adjust blocking to taste, then render a wireframe/viewport still per shot
+  into the project folder (and export `.blend`/`.usd` there too).
 
 ## 3. Render — Krea 2 styles it, the video model moves it
 

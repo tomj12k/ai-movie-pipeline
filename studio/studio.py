@@ -34,7 +34,6 @@ from pathlib import Path
 # Path translation between OS runtime environments (1GbE shared storage).
 # The same project directory as seen from each node:
 PATH_MAP = {
-    "windows": "P:\\",                       # Windows PC (deferred)
     "linux":   "/mnt/synology/projects/",    # DGX Spark (NFS)
     "darwin":  "/Volumes/Active_Projects/",  # Mac via Finder…
     "darwin_alt": str(Path.home() / "StudioMounts/Active_Projects"),  # …or headless
@@ -82,10 +81,7 @@ def projects_root() -> Path:
 def translate(path: Path, target: str) -> str:
     """Re-express a path under Active_Projects for another node's OS."""
     rel = path.resolve().relative_to(projects_root().resolve())
-    base = PATH_MAP[target]
-    if target == "windows":
-        return base + str(rel).replace("/", "\\")
-    return str(Path(base) / rel)
+    return str(Path(PATH_MAP[target]) / rel)
 
 
 def http_json(url, payload=None, timeout=30):
