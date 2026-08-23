@@ -43,10 +43,15 @@ sudo bash -c 'printf "pizzacat ALL=(root) NOPASSWD: /usr/bin/systemctl restart c
   && visudo -c -f /etc/sudoers.d/90-studio-restart'
 
 echo "== 4. Migrate manual processes to services =="
+# Pre-existing USER-level units (Hackster Studio era) must not race the
+# system-level ones for port 8188 — disable them first. (Found live: the user
+# comfyui.service auto-respawned the old process and the new unit crash-looped
+# on 'port already in use'.) embed-server stays user-level untouched.
+systemctl --user disable --now comfyui.service comfyui-8189.service vllm-planner.service 2>/dev/null || true
 # The long-running manual vLLM and ComfyUI (started from shell scripts) are
 # replaced by the units. pkill is scoped to the exact launch commands.
-pkill -f "vllm serve /home/pizzacat/ai/models/llm" 2>/dev/null && echo "stopped manual vllm" || true
-pkill -f "main.py --disable-pinned-memory" 2>/dev/null && echo "stopped manual comfyui" || true
+pkill -f "[v]llm serve /home/pizzacat/ai/models/llm" 2>/dev/null && echo "stopped manual vllm" || true
+pkill -f "[m]ain.py --disable-pinned-memory" 2>/dev/null && echo "stopped manual comfyui" || true
 sleep 3
 sudo systemctl enable --now vllm-qwen38.service comfyui.service
 sudo systemctl enable --now sync-outputs.timer sync-models.timer resolve-db-backup.timer
