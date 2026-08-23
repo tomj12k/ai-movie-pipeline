@@ -1,0 +1,417 @@
+#!/usr/bin/env python3
+"""studio — unified pipeline CLI for the distributed AI film studio.
+
+Runs on the MacBook Air (edit cockpit) or any Linux node. Standard library only.
+
+Commands:
+  status                          network/service health topology
+  script    --project P "idea"    Claude (fable-5) writes a 10s shot list -> NAS
+  code-gen  --project P           local Spark vLLM writes a Blender layout .py
+  watch     --project P           observe NAS for .usd/.blend drops, trigger hook
+  render    --workflow W --project P   submit ComfyUI graph to the Spark
+  clear                           restart ComfyUI on the Spark (flush memory)
+  qa        --project P           Gemini reviews the latest local proxy
+  sync-local --project P          pull renders + build H.264 proxies on this SSD
+
+Config: ~/.studio.env (or <repo>/.env). See .env.example.
+"""
+
+import argparse
+import json
+import os
+import platform
+import re
+import shutil
+import socket
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+# --------------------------------------------------------------------------
+# Path translation between OS runtime environments (1GbE shared storage).
+# The same project directory as seen from each node:
+PATH_MAP = {
+    "windows": "P:\\",                       # Windows PC (deferred)
+    "linux":   "/mnt/synology/projects/",    # DGX Spark (NFS)
+    "darwin":  "/Volumes/Active_Projects/",  # Mac via Finder…
+    "darwin_alt": str(Path.home() / "StudioMounts/Active_Projects"),  # …or headless
+}
+
+
+def load_env():
+    cfg = {}
+    for f in (Path.home() / ".studio.env",
+              Path(__file__).resolve().parent.parent / ".env"):
+        if f.is_file():
+            for line in f.read_text().splitlines():
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    cfg.setdefault(k.strip(), v.strip())
+            break
+    cfg.update({k: v for k, v in os.environ.items() if k in cfg or k.startswith(("SPARK_", "NAS_", "VLLM_", "COMFYUI_", "RESOLVE_"))})
+    return cfg
+
+
+CFG = load_env()
+SPARK = CFG.get("SPARK_HOST", "spark-d1a9.local")
+NAS = CFG.get("NAS_HOST", "192.168.68.131")
+VLLM_URL = CFG.get("VLLM_URL", f"http://{SPARK}:8000/v1")
+COMFY_URL = CFG.get("COMFYUI_URL", f"http://{SPARK}:8188")
+
+
+def projects_root() -> Path:
+    """The Active_Projects share as mounted on THIS machine."""
+    sysname = platform.system().lower()
+    if sysname == "darwin":
+        for p in (Path(PATH_MAP["darwin"]), Path(PATH_MAP["darwin_alt"])):
+            if p.is_dir():
+                return p
+        sys.exit("Active_Projects is not mounted — run deploy/macos/mount_shares.sh")
+    if sysname == "linux":
+        p = Path(PATH_MAP["linux"])
+        if p.is_dir():
+            return p
+        sys.exit("NFS mount missing — run deploy/spark/setup_spark.sh")
+    sys.exit(f"unsupported platform: {sysname}")
+
+
+def translate(path: Path, target: str) -> str:
+    """Re-express a path under Active_Projects for another node's OS."""
+    rel = path.resolve().relative_to(projects_root().resolve())
+    base = PATH_MAP[target]
+    if target == "windows":
+        return base + str(rel).replace("/", "\\")
+    return str(Path(base) / rel)
+
+
+def http_json(url, payload=None, timeout=30):
+    data = json.dumps(payload).encode() if payload is not None else None
+    req = urllib.request.Request(url, data=data,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode())
+
+
+def run(cmd, **kw):
+    return subprocess.run(cmd, text=True, capture_output=True, **kw)
+
+
+# ------------------------------------------------------------------ status
+def probe(host, port, timeout=2.0):
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
+def cmd_status(_):
+    checks = [
+        ("DGX Spark",   SPARK, [("ssh", 22), ("vLLM", 8000), ("ComfyUI", 8188),
+                                ("Resolve DB", 5432)]),
+        ("Synology NAS", NAS,  [("SMB", 445), ("DSM", 5000), ("NFS", 2049)]),
+    ]
+    print("┌─ studio topology ──────────────────────────────────────┐")
+    ok_all = True
+    for name, host, ports in checks:
+        up = probe(host, ports[0][1])
+        print(f"│ {name:<13} {host:<20} {'● up' if up else '○ DOWN'}")
+        for label, port in ports:
+            good = probe(host, port)
+            ok_all &= good
+            print(f"│   ├─ {label:<11} :{port:<6} {'✓' if good else '✗ unreachable'}")
+    root = None
+    try:
+        root = projects_root()
+    except SystemExit:
+        ok_all = False
+    print(f"│ Storage        Active_Projects  "
+          f"{'✓ ' + str(root) if root else '✗ not mounted'}")
+    if probe(SPARK, 8000):
+        try:
+            models = http_json(f"{VLLM_URL}/models", timeout=5)
+            names = ", ".join(m["id"] for m in models.get("data", []))
+            print(f"│ LLM            {names}")
+        except Exception:
+            print("│ LLM            (loading…)")
+    print("└────────────────────────────────────────────────────────┘")
+    sys.exit(0 if ok_all else 1)
+
+
+# ------------------------------------------------------------------ script
+SHOTLIST_BRIEF = """Write a frame-by-frame cinematic shot list for a seamless \
+10-second portfolio reel (24 fps, 240 frames) based on this idea:
+
+{idea}
+
+Structure it as markdown with: title, logline, a table of shots (shot id, \
+frame range, duration, camera move on a 35mm lens, subject/action, lighting, \
+style keywords), then per-shot image-generation prompts (for Krea 2) and \
+video-motion prompts (for LTX-2.3 / Wan 2.2 image-to-video). Keep everything \
+physically continuous so shots cut together seamlessly."""
+
+
+def cmd_script(a):
+    proj = projects_root() / a.project
+    proj.mkdir(parents=True, exist_ok=True)
+    idea = " ".join(a.idea) or input("Shot idea: ")
+    print("→ claude (fable-5) is writing the shot list…")
+    r = run(["claude", "--model", "claude-fable-5", "-p", SHOTLIST_BRIEF.format(idea=idea)],
+            timeout=600)
+    if r.returncode != 0:
+        sys.exit(f"claude failed: {r.stderr.strip()[:400]}")
+    out = proj / "shotlist.md"
+    out.write_text(r.stdout)
+    print(f"✓ shot list saved: {out}\n  (Spark sees it at "
+          f"{translate(out, 'linux')})")
+
+
+# ---------------------------------------------------------------- code-gen
+CODEGEN_PROMPT = """You are a Blender 4.x Python expert. From the shot list \
+below, write ONE complete Python script (bpy) that builds the base bounding \
+layout for the whole reel: one collection per shot containing named bounding \
+boxes for every subject/prop (correct relative scale/position), a ground \
+plane, placeholder lights matching each shot's lighting note, and a single \
+35mm camera on an animated track that reproduces every camera move across \
+frames 1-240 at 24 fps (keyframe the camera per shot's frame range). \
+Set scene resolution 1920x1080. Reply with ONLY the Python code.
+
+SHOT LIST:
+{shotlist}"""
+
+
+def cmd_codegen(a):
+    proj = projects_root() / a.project
+    shotlist = proj / "shotlist.md"
+    if not shotlist.is_file():
+        sys.exit(f"no shot list at {shotlist} — run: studio script --project {a.project}")
+    print("→ Spark vLLM (Qwen3.8-27B) is writing the Blender layout…")
+    resp = http_json(f"{VLLM_URL}/chat/completions", {
+        "model": CFG.get("VLLM_MODEL", "Qwen3.8-27B"),
+        "messages": [{"role": "user",
+                      "content": CODEGEN_PROMPT.format(shotlist=shotlist.read_text())}],
+        "max_tokens": 8192, "temperature": 0.2,
+    }, timeout=900)
+    code = resp["choices"][0]["message"]["content"]
+    m = re.search(r"```(?:python)?\n(.*?)```", code, re.S)
+    if m:
+        code = m.group(1)
+    out = proj / "blender_layout.py"
+    out.write_text(code)
+    print(f"✓ Blender layout saved: {out}\n  Open the stage machine and run it "
+          f"inside Blender (Scripting tab).")
+
+
+# ------------------------------------------------------------------- watch
+def _stable(f: Path) -> bool:
+    """Two identical size samples 500ms apart — clears 1GbE write-lag buffers."""
+    try:
+        s1 = f.stat().st_size
+        time.sleep(0.5)
+        s2 = f.stat().st_size
+        time.sleep(0.5)
+        return s1 == s2 == f.stat().st_size and s1 > 0
+    except OSError:
+        return False
+
+
+def cmd_watch(a):
+    root = projects_root() / a.project
+    root.mkdir(parents=True, exist_ok=True)
+    seen = {}
+    print(f"👁  watching {root} for .usd/.blend drops (Ctrl-C to stop)")
+    while True:
+        for f in list(root.rglob("*.usd")) + list(root.rglob("*.usdc")) + \
+                 list(root.rglob("*.blend")):
+            key = str(f)
+            try:
+                mtime = f.stat().st_mtime
+            except OSError:
+                continue
+            if seen.get(key) == mtime:
+                continue
+            if not _stable(f):
+                continue           # still copying over the wire — next pass
+            seen[key] = f.stat().st_mtime
+            print(f"● stable drop: {f.name} — triggering render hook")
+            if a.workflow:
+                try:
+                    submit_workflow(Path(a.workflow), a.project)
+                except Exception as e:
+                    print(f"  render trigger failed: {e}")
+            else:
+                print(f"  (no --workflow given; drop registered only)")
+        time.sleep(a.interval)
+
+
+# ------------------------------------------------------------------ render
+def submit_workflow(wf_path: Path, project: str) -> str:
+    graph = json.loads(Path(wf_path).read_text())
+    # Route every save node into the project's folder on the Spark.
+    for node in graph.values():
+        if isinstance(node, dict):
+            ins = node.get("inputs", {})
+            if "filename_prefix" in ins:
+                ins["filename_prefix"] = f"{project}/" + \
+                    Path(str(ins["filename_prefix"])).name
+    resp = http_json(f"{COMFY_URL}/prompt", {"prompt": graph})
+    pid = resp["prompt_id"]
+    print(f"→ submitted to ComfyUI: {pid}")
+    return pid
+
+
+def cmd_render(a):
+    pid = submit_workflow(Path(a.workflow), a.project)
+    print("… rendering on the Spark (Ctrl-C detaches; render continues)")
+    t0 = time.time()
+    while True:
+        time.sleep(10)
+        try:
+            hist = http_json(f"{COMFY_URL}/history/{pid}", timeout=10)
+        except Exception:
+            continue
+        if pid in hist:
+            st = hist[pid].get("status", {})
+            outs = hist[pid].get("outputs", {})
+            if st.get("completed") or outs:
+                print(f"✓ render finished in {time.time()-t0:.0f}s; frames sync "
+                      f"to Active_Projects/{a.project}/renders within ~1 min")
+                return
+            if st.get("status_str") == "error":
+                sys.exit(f"✗ render failed: {json.dumps(st)[:500]}")
+        print(f"  … {time.time()-t0:.0f}s elapsed")
+
+
+# ------------------------------------------------------------------- clear
+def cmd_clear(_):
+    user = CFG.get("SPARK_USER", "pizzacat")
+    print("→ restarting ComfyUI on the Spark (flushes unified-memory pool)…")
+    r = run(["ssh", f"{user}@{SPARK}", "sudo systemctl restart comfyui"])
+    if r.returncode != 0:
+        sys.exit(f"ssh failed: {r.stderr.strip()[:300]}")
+    for _ in range(30):
+        time.sleep(2)
+        if probe(SPARK, 8188):
+            try:
+                http_json(f"{COMFY_URL}/system_stats", timeout=3)
+                print("✓ ComfyUI is back; memory pool clean")
+                return
+            except Exception:
+                pass
+    sys.exit("ComfyUI did not come back within 60s — check: "
+             f"ssh {user}@{SPARK} journalctl -u comfyui -n 50")
+
+
+# ---------------------------------------------------------------------- qa
+QA_PROMPT = """You are a film QA supervisor. Review this rendered video for a \
+10-second AI-animated reel. Report, with timestamps: layout errors (clipping, \
+floating objects, broken silhouettes), lighting breaks (flicker, direction \
+jumps between shots), temporal artifacts (morphing, identity drift), and \
+continuity breaks between shots. Then give a verdict: SHIP / FIX (with the \
+top 3 fixes). Video file: {path}"""
+
+
+def cmd_qa(a):
+    proxies = sorted((Path.home() / "StudioProxies" / a.project / "proxy").glob("*.mp4"),
+                     key=lambda p: p.stat().st_mtime)
+    if not proxies:
+        sys.exit(f"no proxies for {a.project} — run: studio sync-local --project {a.project}")
+    target = proxies[-1]
+    print(f"→ gemini QA pass on {target.name}…")
+    r = run(["gemini", "-p", QA_PROMPT.format(path=target)], timeout=900)
+    if r.returncode != 0:
+        sys.exit(f"gemini failed: {r.stderr.strip()[:400]}")
+    report = projects_root() / a.project / "qa_report.md"
+    report.write_text(f"# QA report — {target.name}\n\n{r.stdout}")
+    print(f"✓ QA report: {report}\n")
+    print(r.stdout[:1200])
+
+
+# --------------------------------------------------------------- sync-local
+VIDEO_EXT = {".mp4", ".mov", ".webm", ".mkv"}
+
+
+def cmd_sync(a):
+    src = projects_root() / a.project / "renders"
+    if not src.is_dir():
+        sys.exit(f"no renders yet at {src}")
+    dest = Path.home() / "StudioProxies" / a.project
+    raw, proxy = dest / "raw", dest / "proxy"
+    raw.mkdir(parents=True, exist_ok=True)
+    proxy.mkdir(parents=True, exist_ok=True)
+
+    print(f"→ pulling {src} → {raw} (background-friendly, resumable)")
+    if shutil.which("rsync"):
+        r = run(["rsync", "-a", "--partial", f"{src}/", f"{raw}/"])
+        if r.returncode != 0:
+            sys.exit(f"rsync failed: {r.stderr.strip()[:300]}")
+    else:
+        shutil.copytree(src, raw, dirs_exist_ok=True)
+
+    if not shutil.which("ffmpeg"):
+        sys.exit("ffmpeg missing — brew install ffmpeg")
+    made = 0
+    for f in sorted(raw.rglob("*")):
+        if f.suffix.lower() not in VIDEO_EXT:
+            continue
+        out = proxy / (f.stem + "_proxy.mp4")
+        if out.exists() and out.stat().st_mtime >= f.stat().st_mtime:
+            continue
+        print(f"  ⋯ proxy: {f.name}")
+        r = run(["ffmpeg", "-y", "-i", str(f), "-vf", "scale=-2:720",
+                 "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+                 "-c:a", "aac", "-b:a", "128k", str(out)])
+        if r.returncode != 0:
+            print(f"    ffmpeg failed on {f.name}: {r.stderr[-200:]}")
+        else:
+            made += 1
+    print(f"✓ {made} proxies in {proxy}")
+    print("  In Resolve: Project Settings → point proxy media at this folder; "
+          "cache stays on /Users/Shared/Resolve_Cache (see configs/resolve).")
+
+
+# -------------------------------------------------------------------- main
+def main():
+    p = argparse.ArgumentParser(prog="studio", description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    sub.add_parser("status").set_defaults(fn=cmd_status)
+
+    s = sub.add_parser("script"); s.set_defaults(fn=cmd_script)
+    s.add_argument("--project", required=True)
+    s.add_argument("idea", nargs="*", help="one-line concept for the reel")
+
+    s = sub.add_parser("code-gen"); s.set_defaults(fn=cmd_codegen)
+    s.add_argument("--project", required=True)
+
+    s = sub.add_parser("watch"); s.set_defaults(fn=cmd_watch)
+    s.add_argument("--project", required=True)
+    s.add_argument("--workflow", help="ComfyUI API json to fire on each drop")
+    s.add_argument("--interval", type=float, default=5.0)
+
+    s = sub.add_parser("render"); s.set_defaults(fn=cmd_render)
+    s.add_argument("--workflow", required=True)
+    s.add_argument("--project", required=True)
+
+    sub.add_parser("clear").set_defaults(fn=cmd_clear)
+
+    s = sub.add_parser("qa"); s.set_defaults(fn=cmd_qa)
+    s.add_argument("--project", required=True)
+
+    s = sub.add_parser("sync-local"); s.set_defaults(fn=cmd_sync)
+    s.add_argument("--project", required=True)
+
+    a = p.parse_args()
+    try:
+        a.fn(a)
+    except KeyboardInterrupt:
+        print("\ninterrupted")
+
+
+if __name__ == "__main__":
+    main()
