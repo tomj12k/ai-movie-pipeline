@@ -439,6 +439,12 @@ def cmd_sync(a):
 
 # -------------------------------------------------------------------- main
 def main():
+    # argparse.REMAINDER mis-parses flags straight after a subcommand, so the
+    # pipeline subcommand forwards its raw argv before argparse ever runs.
+    if len(sys.argv) > 1 and sys.argv[1] == "pipeline":
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import pipeline
+        return pipeline.main(sys.argv[2:])
     p = argparse.ArgumentParser(prog="studio", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -473,8 +479,7 @@ def main():
     s.add_argument("--project", required=True)
 
     s = sub.add_parser("pipeline", help="run all stages with visual checkpoints")
-    s.set_defaults(fn=lambda a: __import__("pipeline").main(a.rest))
-    s.add_argument("rest", nargs=argparse.REMAINDER)
+    s.set_defaults(fn=None)  # handled by the early intercept in main()
 
     a = p.parse_args()
     try:
