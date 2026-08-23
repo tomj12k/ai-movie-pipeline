@@ -265,8 +265,8 @@
     1
    ],
    "latent_image": [
-    "16",
-    2
+    "27",
+    0
    ],
    "seed": 7,
    "steps": 8,
@@ -283,7 +283,7 @@
   },
   "inputs": {
    "samples": [
-    "17",
+    "28",
     0
    ],
    "vae": [
@@ -302,7 +302,11 @@
     "18",
     0
    ],
-   "fps": 24.0
+   "fps": 24.0,
+   "audio": [
+    "29",
+    0
+   ]
   }
  },
  "20": {
@@ -337,6 +341,74 @@
    "lora_name": "niko.safetensors",
    "strength_model": 0.85,
    "strength_clip": 0.85
+  }
+ },
+ "25": {
+  "class_type": "LTXVAudioVAELoader",
+  "_meta": {
+   "title": "audio vae (bundled)"
+  },
+  "inputs": {
+   "ckpt_name": "ltx-2.3-22b-distilled-fp8.safetensors"
+  }
+ },
+ "26": {
+  "class_type": "LTXVEmptyLatentAudio",
+  "_meta": {
+   "title": "empty audio latent"
+  },
+  "inputs": {
+   "frames_number": 241,
+   "frame_rate": 24,
+   "batch_size": 1,
+   "audio_vae": [
+    "25",
+    0
+   ]
+  }
+ },
+ "27": {
+  "class_type": "LTXVConcatAVLatent",
+  "_meta": {
+   "title": "concat AV latent"
+  },
+  "inputs": {
+   "video_latent": [
+    "16",
+    2
+   ],
+   "audio_latent": [
+    "26",
+    0
+   ]
+  }
+ },
+ "28": {
+  "class_type": "LTXVSeparateAVLatent",
+  "_meta": {
+   "title": "split AV"
+  },
+  "inputs": {
+   "av_latent": [
+    "17",
+    0
+   ]
+  }
+ },
+ "29": {
+  "class_type": "LTXVAudioVAEDecode",
+  "_meta": {
+   "title": "decode audio"
+  },
+  "inputs": {
+   "samples": [
+    "28",
+    1
+   ],
+   "audio_vae": [
+    "25",
+    0
+   ]
   }
  }
 }

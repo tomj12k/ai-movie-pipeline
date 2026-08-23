@@ -213,10 +213,18 @@ def stage_assemble(proj, shots, rv, a):
     for shot, clip in pairs:
         dur = shot.get("trim_frames", 48) / 24.0
         seg = rv.dir / f"seg_{shot['id']}.mp4"
-        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(clip),
-                        "-t", f"{dur:.4f}", "-r", "24", "-an",
-                        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-                        str(seg)], check=True)
+        has_audio = bool(subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "a",
+             "-show_entries", "stream=index", "-of", "csv=p=0", str(clip)],
+            capture_output=True, text=True).stdout.strip())
+        cmd = ["ffmpeg", "-y", "-v", "error", "-i", str(clip)]
+        if not has_audio:   # pad silent audio so every segment concats uniformly
+            cmd += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
+        cmd += ["-t", f"{dur:.4f}", "-r", "24",
+                "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+                "-c:a", "aac", "-ar", "48000", "-b:a", "192k", "-shortest",
+                str(seg)]
+        subprocess.run(cmd, check=True)
         segs.append(seg)
     lst = rv.dir / "concat.txt"
     lst.write_text("".join(f"file '{s}'\n" for s in segs))
