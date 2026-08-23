@@ -143,9 +143,12 @@ def stage_render(proj, shots, rv, a):
     for shot in shots:
         sid = shot["id"]
         before = set(renders.glob("*.mp4")) if renders.is_dir() else set()
+        # A shot may override its i2i input ("input_image"), e.g. a frame pulled
+        # from the previous shot's render for hard character continuity.
+        img = proj / shot.get("input_image", f"{sid}_wireframe.png")
         pid = st.submit_workflow(shot.get("workflow", "krea2_niko_ltx_pipeline"),
                                  a.project,
-                                 image=proj / f"{sid}_wireframe.png",
+                                 image=img,
                                  style_prompt=shot["style_prompt"],
                                  motion_prompt=shot["motion_prompt"],
                                  seed=shot.get("seed"))
