@@ -1,0 +1,19 @@
+# Secrets — never commit
+.env
+*.pem
+*.key
+id_ed25519*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Local artifacts
+*.log
+proxies/
+renders/
+.DS_Store
+
+# Tooling state
+.claude-flow/
