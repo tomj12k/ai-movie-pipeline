@@ -277,9 +277,23 @@ def upload_image(path: Path) -> str:
         return json.loads(r.read().decode())["name"]
 
 
-def submit_workflow(wf_path: Path, project: str, image=None,
+def resolve_workflow(wf: str) -> Path:
+    """Accept an absolute path, a repo-relative path, or a bare name —
+    from any working directory."""
+    repo_workflows = Path(__file__).resolve().parent.parent / "workflows"
+    name = Path(wf).name
+    candidates = [Path(wf).expanduser(), repo_workflows / name,
+                  repo_workflows / f"{name}.json"]
+    for c in candidates:
+        if c.is_file():
+            return c
+    sys.exit(f"workflow not found: {wf}\n  available: " +
+             ", ".join(p.stem for p in sorted(repo_workflows.glob('*.json'))))
+
+
+def submit_workflow(wf_path, project: str, image=None,
                     style_prompt=None, motion_prompt=None) -> str:
-    raw = json.loads(Path(wf_path).read_text())
+    raw = json.loads(resolve_workflow(str(wf_path)).read_text())
     graph = {k: v for k, v in raw.items() if isinstance(v, dict)}  # drop _meta_workflow
     img_name = upload_image(Path(image)) if image else None
     for node in graph.values():
