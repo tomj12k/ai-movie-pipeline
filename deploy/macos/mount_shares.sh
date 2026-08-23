@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# Mount the studio SMB shares on the Mac under /Volumes without sudo.
-# Uses AppleScript's `mount volume`, which lands shares at
-# /Volumes/Active_Projects and /Volumes/Portfolio_Archive — the exact paths
-# studio.py's path translation and DaVinci Resolve expect.
+# Mount the studio SMB shares on the Mac — no sudo, no GUI.
+#
+# Uses mount_smbfs into ~/StudioMounts/<share>. (The AppleScript
+# `mount volume` route to /Volumes hangs when no GUI session can answer
+# its dialogs, so it is not used.) If a share is already mounted anywhere
+# — including /Volumes/<share> via Finder — it is skipped; studio.py
+# resolves whichever mount point exists.
 #
 # Reads credentials from ~/.studio.env (installed by setup_mac.sh, chmod 600).
-# Idempotent: already-mounted shares are skipped. Run at login via the
-# com.studio.mountshares LaunchAgent.
+# Runs at login via the com.studio.mountshares LaunchAgent.
 set -euo pipefail
 
 ENVF="$HOME/.studio.env"
@@ -17,14 +19,15 @@ source "$ENVF"
 
 mount_share() {
   local share="$1"
-  if mount | grep -q "/Volumes/${share} "; then
-    echo "already mounted: /Volumes/${share}"
+  if mount | grep -q "/${share} "; then
+    echo "already mounted: ${share}"
     return 0
   fi
-  osascript >/dev/null <<EOF
-mount volume "smb://${NAS_USER}:${NAS_PASS}@${NAS_SMB_HOST}/${share}"
-EOF
-  echo "mounted: /Volumes/${share}"
+  local mp="$HOME/StudioMounts/${share}"
+  mkdir -p "$mp"
+  # -o soft: fail fast if the NAS is down instead of wedging Finder/Resolve.
+  mount_smbfs -o soft "//${NAS_USER}:${NAS_PASS}@${NAS_SMB_HOST}/${share}" "$mp"
+  echo "mounted: $mp"
 }
 
 mount_share Active_Projects
