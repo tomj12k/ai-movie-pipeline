@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# Provision the Synology DS423 for the AI movie pipeline.
+#
+# Creates shares:   AI_Models, Active_Projects, Portfolio_Archive  (on /volume1)
+# Enables:          NFSv4.1 service, SSH, per-share NFS rules for the DGX Spark
+# Requires:         .env in the repo root (NAS_HOST, NAS_DSM_PORT, NAS_USER, NAS_PASS,
+#                   SPARK_IP; optional SPARK_IP2 for a second interface)
+#
+# Everything runs over the DSM Web API + one SSH call for `synoshare`.
+# Idempotent: safe to re-run; existing shares/rules are left as-is or overwritten
+# with the same values.
+#
+# Note: the DS423 (ARM Realtek) has no NVMe cache slots and no Container Manager.
+# Heavy caching is done on the clients by design (see README design rules).
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC1091
+source "$REPO_ROOT/.env"
+
+: "${NAS_HOST:?}" "${NAS_DSM_PORT:?}" "${NAS_USER:?}" "${NAS_PASS:?}" "${SPARK_IP:?}"
+SPARK_IP2="${SPARK_IP2:-}"
+
+BASE="https://${NAS_HOST}:${NAS_DSM_PORT}/webapi/entry.cgi"
+CURL=(curl -sk)
+
+api_login() {
+  local resp
+  resp=$("${CURL[@]}" "${BASE}?api=SYNO.API.Auth&version=7&method=login&account=${NAS_USER}&passwd=${NAS_PASS}&session=StudioProv&format=sid&enable_syno_token=yes")
+  SID=$(python3 -c "import sys,json;print(json.loads(sys.argv[1])['data']['sid'])" "$resp")
+  TOKEN=$(python3 -c "import sys,json;print(json.loads(sys.argv[1])['data']['synotoken'])" "$resp")
+  [[ -n "$SID" && -n "$TOKEN" ]] || { echo "ERROR: DSM login failed: $resp" >&2; exit 1; }
+}
+
+# api_post <api> <version> <method> [--data-urlencode k=v ...]
+api_post() {
+  local api="$1" version="$2" method="$3"; shift 3
+  "${CURL[@]}" -H "X-SYNO-TOKEN:${TOKEN}" "${BASE}?_sid=${SID}&SynoToken=${TOKEN}" \
+    --data-urlencode "api=${api}" \
+    --data-urlencode "version=${version}" \
+    --data-urlencode "method=${method}" \
+    "$@"
+}
+
+require_ok() {  # require_ok <label> <json>
+  python3 - "$1" "$2" <<'EOF'
+import sys, json
+label, raw = sys.argv[1], sys.argv[2]
+d = json.loads(raw)
+if not d.get("success"):
+    print(f"ERROR: {label}: {raw}", file=sys.stderr); sys.exit(1)
+print(f"ok: {label}")
+EOF
+}
+
+echo "== 1. DSM login =="
+api_login
+
+echo "== 2. Enable SSH (needed for synoshare share creation) =="
+require_ok "enable ssh" "$(api_post SYNO.Core.Terminal 3 set \
+  --data-urlencode "enable_ssh=true" \
+  --data-urlencode "enable_telnet=false" \
+  --data-urlencode "ssh_port=22")"
+
+echo "== 3. Create shares via synoshare (skips ones that already exist) =="
+# synoshare --add <name> <desc> <path> <na-users> <rw-users> <ro-users> <browsable 0|1> <adv_privilege 0~7>
+sshpass -p "$NAS_PASS" ssh -o StrictHostKeyChecking=accept-new "${NAS_USER}@${NAS_HOST}" "
+  P=\$(cat); S=/usr/syno/sbin/synoshare
+  add() {
+    if echo \"\$P\" | sudo -S \$S --get \"\$1\" >/dev/null 2>&1; then
+      echo \"share \$1 already exists\"
+    else
+      echo \"\$P\" | sudo -S \$S --add \"\$1\" \"\$2\" \"/volume1/\$1\" \"\" \"${NAS_USER}\" \"\" 1 0
+      echo \"created \$1\"
+    fi
+  }
+  add AI_Models          'Model weights backup and distribution'
+  add Active_Projects    'Live film projects: scripts, USD/Blend stages, renders'
+  add Portfolio_Archive  'Finished masters and project cold storage'
+" <<<"$NAS_PASS"
+
+echo "== 4. Enable NFS service (v4.1) =="
+require_ok "enable nfs" "$(api_post SYNO.Core.FileServ.NFS 3 set \
+  --data-urlencode "enable_nfs=true" \
+  --data-urlencode "enable_nfs_v4=true" \
+  --data-urlencode "enabled_minor_ver=1" \
+  --data-urlencode "nfs_v4_domain=localdomain" \
+  --data-urlencode "read_size=32768" \
+  --data-urlencode "write_size=32768" \
+  --data-urlencode "unix_pri_enable=true")"
+
+echo "== 5. NFS export rules for the Spark =="
+mk_rule() {  # mk_rule <ip>
+  printf '{"client":"%s","privilege":"rw","root_squash":"root","async":true,"insecure":false,"crossmnt":false,"security_flavor":{"sys":true,"kerberos":false,"kerberos_integrity":false,"kerberos_privacy":false}}' "$1"
+}
+RULES="[$(mk_rule "$SPARK_IP")"
+[[ -n "$SPARK_IP2" ]] && RULES+=",$(mk_rule "$SPARK_IP2")"
+RULES+="]"
+
+for SHARE in AI_Models Active_Projects Portfolio_Archive; do
+  require_ok "nfs rule ${SHARE}" "$(api_post SYNO.Core.FileServ.NFS.SharePrivilege 1 save \
+    --data-urlencode "share_name=${SHARE}" \
+    --data-urlencode "rule=${RULES}")"
+done
+
+echo "== 6. Verify =="
+sshpass -p "$NAS_PASS" ssh "${NAS_USER}@${NAS_HOST}" \
+  "echo '$NAS_PASS' | sudo -S cat /etc/exports" 2>/dev/null | grep -E "volume1" || true
+
+echo
+echo "Done. Shares are exported over NFS to the Spark and reachable over SMB"
+echo "for the Mac (smb://${NAS_HOST}) as user ${NAS_USER}."
