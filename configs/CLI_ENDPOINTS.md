@@ -6,7 +6,7 @@ Every terminal AI tool in the studio, where it runs, and what it talks to.
 |-----|---------|---------|-----------------|
 | `claude` (Claude Code) | Mac | Anthropic cloud — `claude-fable-5` / `claude-opus-5` | own login (`claude /login`); no file needed |
 | `codex` | Mac | OpenAI cloud | `~/.codex/config.toml` (own login) |
-| `gemini` (Antigravity) | Mac | Google cloud | `~/.gemini/` (own OAuth) |
+| `agy` (Antigravity) | Mac | Google cloud | `~/.gemini/antigravity-cli/` (own OAuth). The old `gemini` CLI individual tier is retired — `studio qa` uses `agy` automatically |
 | `opencode` | Mac | **local** Spark vLLM `http://spark-d1a9.local:8000/v1` | `~/.config/opencode/opencode.json` — copy of `opencode.mac.json` |
 | `opencode` | Spark | **local** vLLM `http://127.0.0.1:8000/v1` | `~/.config/opencode/opencode.json` — copy of `opencode.spark.json` |
 

@@ -194,14 +194,22 @@ def cmd_codegen(a):
         "model": CFG.get("VLLM_MODEL", "Qwen3.8-27B"),
         "messages": [{"role": "user",
                       "content": CODEGEN_PROMPT.format(shotlist=shotlist.read_text())}],
-        "max_tokens": 8192, "temperature": 0.2,
-    }, timeout=900)
+        # Reasoning off: Qwen3.x otherwise spends the whole budget thinking
+        # aloud before any code appears (~5-9 tok/s on the GB10).
+        "chat_template_kwargs": {"enable_thinking": False},
+        "max_tokens": 16384, "temperature": 0.2,
+    }, timeout=2700)
     code = resp["choices"][0]["message"]["content"]
+    code = re.sub(r"<think>.*?</think>", "", code, flags=re.S).strip()
     m = re.search(r"```(?:python)?\n(.*?)```", code, re.S)
     if m:
         code = m.group(1)
     out = proj / "blender_layout.py"
     out.write_text(code)
+    try:
+        compile(code, str(out), "exec")
+    except SyntaxError as e:
+        sys.exit(f"✗ generated file is not valid Python ({e}); re-run code-gen")
     print(f"✓ Blender layout saved: {out}\n  Open the stage machine and run it "
           f"inside Blender (Scripting tab).")
 
@@ -340,7 +348,7 @@ QA_PROMPT = """You are a film QA supervisor. Review this rendered video for a \
 floating objects, broken silhouettes), lighting breaks (flicker, direction \
 jumps between shots), temporal artifacts (morphing, identity drift), and \
 continuity breaks between shots. Then give a verdict: SHIP / FIX (with the \
-top 3 fixes). Video file: {path}"""
+top 3 fixes). Review this video: @{path}"""
 
 
 def cmd_qa(a):
@@ -349,10 +357,16 @@ def cmd_qa(a):
     if not proxies:
         sys.exit(f"no proxies for {a.project} — run: studio sync-local --project {a.project}")
     target = proxies[-1]
-    print(f"→ gemini QA pass on {target.name}…")
-    r = run(["gemini", "-p", QA_PROMPT.format(path=target)], timeout=900)
+    # Antigravity (`agy`) replaced the retired individual-tier gemini CLI auth;
+    # fall back to `gemini` for accounts still on the old path.
+    tool = "agy" if shutil.which("agy") else "gemini"
+    print(f"→ {tool} QA pass on {target.name}…")
+    r = run([tool, "--dangerously-skip-permissions", "-p",
+             QA_PROMPT.format(path=target)] if tool == "agy" else
+            [tool, "-p", QA_PROMPT.format(path=target)],
+            timeout=900, cwd=target.parent)
     if r.returncode != 0:
-        sys.exit(f"gemini failed: {r.stderr.strip()[:400]}")
+        sys.exit(f"{tool} failed: {(r.stderr or r.stdout).strip()[:400]}")
     report = projects_root() / a.project / "qa_report.md"
     report.write_text(f"# QA report — {target.name}\n\n{r.stdout}")
     print(f"✓ QA report: {report}\n")
