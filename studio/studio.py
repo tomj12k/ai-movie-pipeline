@@ -361,7 +361,10 @@ def cmd_qa(a):
     # fall back to `gemini` for accounts still on the old path.
     tool = "agy" if shutil.which("agy") else "gemini"
     print(f"→ {tool} QA pass on {target.name}…")
-    r = run([tool, "--dangerously-skip-permissions", "-p",
+    # --sandbox confines agy to terminal-restricted read-only review;
+    # skip-permissions only auto-approves inside that sandbox (it must read
+    # the video file non-interactively).
+    r = run([tool, "--sandbox", "--dangerously-skip-permissions", "-p",
              QA_PROMPT.format(path=target)] if tool == "agy" else
             [tool, "-p", QA_PROMPT.format(path=target)],
             timeout=900, cwd=target.parent)
