@@ -292,7 +292,7 @@ def resolve_workflow(wf: str) -> Path:
 
 
 def submit_workflow(wf_path, project: str, image=None,
-                    style_prompt=None, motion_prompt=None) -> str:
+                    style_prompt=None, motion_prompt=None, seed=None) -> str:
     raw = json.loads(resolve_workflow(str(wf_path)).read_text())
     graph = {k: v for k, v in raw.items() if isinstance(v, dict)}  # drop _meta_workflow
     img_name = upload_image(Path(image)) if image else None
@@ -309,6 +309,10 @@ def submit_workflow(wf_path, project: str, image=None,
             ins["text"] = style_prompt
         if motion_prompt and title == "motion_prompt":
             ins["text"] = motion_prompt
+        if seed is not None:
+            for k in ("seed", "noise_seed"):
+                if k in ins:
+                    ins[k] = int(seed)
     resp = http_json(f"{COMFY_URL}/prompt", {"prompt": graph})
     pid = resp["prompt_id"]
     print(f"→ submitted to ComfyUI: {pid}")
@@ -317,7 +321,8 @@ def submit_workflow(wf_path, project: str, image=None,
 
 def cmd_render(a):
     pid = submit_workflow(Path(a.workflow), a.project, image=a.image,
-                          style_prompt=a.style_prompt, motion_prompt=a.motion_prompt)
+                          style_prompt=a.style_prompt, motion_prompt=a.motion_prompt,
+                          seed=a.seed)
     print("… rendering on the Spark (Ctrl-C detaches; render continues)")
     t0 = time.time()
     while True:
@@ -469,6 +474,7 @@ def main():
     s.add_argument("--image", help="local still (e.g. Blender wireframe) to upload")
     s.add_argument("--style-prompt", help="override the Krea 2 style prompt")
     s.add_argument("--motion-prompt", help="override the video motion prompt")
+    s.add_argument("--seed", type=int, help="override every sampler seed in the graph")
 
     sub.add_parser("clear").set_defaults(fn=cmd_clear)
 

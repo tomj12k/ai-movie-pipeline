@@ -147,7 +147,8 @@ def stage_render(proj, shots, rv, a):
                                  a.project,
                                  image=proj / f"{sid}_wireframe.png",
                                  style_prompt=shot["style_prompt"],
-                                 motion_prompt=shot["motion_prompt"])
+                                 motion_prompt=shot["motion_prompt"],
+                                 seed=shot.get("seed"))
         print(f"  {sid}: rendering ({pid})…")
         while True:
             time.sleep(10)
@@ -194,11 +195,19 @@ def stage_assemble(proj, shots, rv, a):
     """Trim each shot to its shots.json frame count and concat a draft reel.
     Clips map to shots in render order (reel_*_00001 -> first shot, etc.)."""
     raw = Path.home() / "StudioProxies" / a.project / "raw"
-    clips = sorted(raw.glob("reel_*.mp4"))
-    if len(clips) < len(shots):
-        print(f"  !! only {len(clips)} clips for {len(shots)} shots — assembling what exists")
+    ordered = sorted(raw.glob("reel_*.mp4"))
+    pairs = []
+    for i, shot in enumerate(shots):
+        # A shot may pin its clip explicitly ("clip": "reel_ltx_00007_.mp4"),
+        # e.g. after a re-render; otherwise clips map positionally.
+        clip = raw / shot["clip"] if shot.get("clip") else \
+               (ordered[i] if i < len(ordered) else None)
+        if clip is None or not clip.is_file():
+            print(f"  !! no clip for {shot['id']} — skipping it in the draft")
+            continue
+        pairs.append((shot, clip))
     segs = []
-    for shot, clip in zip(shots, clips):
+    for shot, clip in pairs:
         dur = shot.get("trim_frames", 48) / 24.0
         seg = rv.dir / f"seg_{shot['id']}.mp4"
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(clip),
