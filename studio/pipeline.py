@@ -209,28 +209,58 @@ def stage_assemble(proj, shots, rv, a):
             print(f"  !! no clip for {shot['id']} — skipping it in the draft")
             continue
         pairs.append((shot, clip))
-    segs = []
+    # Video: hard cuts on the light events. Audio: every shot generates its own
+    # sound world, so raw concat resets tone/level at each cut — instead each
+    # segment's audio is loudness-normalized, runs XF seconds past its picture
+    # cut, and crossfades into the next shot (J-cut), with fades at both ends.
+    XF = 0.30
+    segs, auds, durs = [], [], []
     for shot, clip in pairs:
         dur = shot.get("trim_frames", 48) / 24.0
         seg = rv.dir / f"seg_{shot['id']}.mp4"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(clip),
+                        "-t", f"{dur:.4f}", "-r", "24", "-an",
+                        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+                        str(seg)], check=True)
+        aud = rv.dir / f"aud_{shot['id']}.wav"
         has_audio = bool(subprocess.run(
             ["ffprobe", "-v", "error", "-select_streams", "a",
              "-show_entries", "stream=index", "-of", "csv=p=0", str(clip)],
             capture_output=True, text=True).stdout.strip())
-        cmd = ["ffmpeg", "-y", "-v", "error", "-i", str(clip)]
-        if not has_audio:   # pad silent audio so every segment concats uniformly
-            cmd += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
-        cmd += ["-t", f"{dur:.4f}", "-r", "24",
-                "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-                "-c:a", "aac", "-ar", "48000", "-b:a", "192k", "-shortest",
-                str(seg)]
-        subprocess.run(cmd, check=True)
-        segs.append(seg)
+        src = ["-i", str(clip)] if has_audio else \
+              ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
+        subprocess.run(["ffmpeg", "-y", "-v", "error"] + src +
+                       ["-t", f"{dur + XF:.4f}",
+                        "-af", "loudnorm=I=-18:TP=-1.5:LRA=9",
+                        "-ar", "48000", "-ac", "2", str(aud)], check=True)
+        segs.append(seg); auds.append(aud); durs.append(dur)
+
     lst = rv.dir / "concat.txt"
     lst.write_text("".join(f"file '{s}'\n" for s in segs))
-    draft = proj / "draft_reel.mp4"
+    vid_only = rv.dir / "video_only.mp4"
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0",
-                    "-i", str(lst), "-c", "copy", str(draft)], check=True)
+                    "-i", str(lst), "-c", "copy", str(vid_only)], check=True)
+
+    total = sum(durs)
+    fc, cur = [], "[0:a]"
+    for i in range(1, len(auds)):
+        out = f"[x{i}]"
+        fc.append(f"{cur}[{i}:a]acrossfade=d={XF}:c1=tri:c2=tri{out}")
+        cur = out
+    fc.append(f"{cur}afade=t=in:d=0.2,afade=t=out:st={total - 0.4:.3f}:d=0.4[aout]")
+    mixed = rv.dir / "audio_mix.wav"
+    cmd = ["ffmpeg", "-y", "-v", "error"]
+    for af in auds:
+        cmd += ["-i", str(af)]
+    cmd += ["-filter_complex", ";".join(fc), "-map", "[aout]",
+            "-t", f"{total:.4f}", str(mixed)]
+    subprocess.run(cmd, check=True)
+
+    draft = proj / "draft_reel.mp4"
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(vid_only),
+                    "-i", str(mixed), "-map", "0:v", "-map", "1:a",
+                    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                    "-shortest", str(draft)], check=True)
     # Put a copy where `studio qa` looks, so QA reviews the assembled film.
     proxdir = Path.home() / "StudioProxies" / a.project / "proxy"
     proxdir.mkdir(parents=True, exist_ok=True)
