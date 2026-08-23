@@ -36,6 +36,9 @@ dl() {  # dl <repo> <repo_path> <dest_dir>
 
 echo "== LTX-2.3 (primary lane) =="
 dl Lightricks/LTX-2.3-fp8 ltx-2.3-22b-distilled-fp8.safetensors "$M/checkpoints"
+# The checkpoint has no bundled text encoder — LTX-2.x conditions on Gemma 3
+# 12B via LTXAVTextEncoderLoader (checkpoint supplies only the projection).
+dl Comfy-Org/ltx-2 split_files/text_encoders/gemma_3_12B_it_fp8_scaled.safetensors "$M/clip"
 
 echo "== Wan 2.2 I2V 14B (hero-shot lane) =="
 dl Comfy-Org/Wan_2.2_ComfyUI_Repackaged split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors "$M/unet"

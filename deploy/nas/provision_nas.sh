@@ -23,11 +23,23 @@ source "$REPO_ROOT/.env"
 SPARK_IP2="${SPARK_IP2:-}"
 
 BASE="https://${NAS_HOST}:${NAS_DSM_PORT}/webapi/entry.cgi"
-CURL=(curl -sk)
+# -k: DSM serves a self-signed certificate on the LAN. To pin it instead,
+# export NAS_CA=/path/to/dsm-cert.pem and the scripts verify against it.
+if [[ -n "${NAS_CA:-}" ]]; then CURL=(curl -s --cacert "$NAS_CA"); else CURL=(curl -sk); fi
 
+# Login POSTs the credentials via stdin (curl -d @-) so the password never
+# appears in a URL, process argv, or the DSM access log query string.
 api_login() {
-  local resp
-  resp=$("${CURL[@]}" "${BASE}?api=SYNO.API.Auth&version=7&method=login&account=${NAS_USER}&passwd=${NAS_PASS}&session=StudioProv&format=sid&enable_syno_token=yes")
+  local resp body
+  body=$(python3 - <<EOF
+from urllib.parse import urlencode
+import os
+print(urlencode({"api":"SYNO.API.Auth","version":"7","method":"login",
+                 "account":"${NAS_USER}","passwd":"""${NAS_PASS}""",
+                 "session":"StudioProv","format":"sid","enable_syno_token":"yes"}))
+EOF
+)
+  resp=$(printf '%s' "$body" | "${CURL[@]}" -d @- "$BASE")
   SID=$(python3 -c "import sys,json;print(json.loads(sys.argv[1])['data']['sid'])" "$resp")
   TOKEN=$(python3 -c "import sys,json;print(json.loads(sys.argv[1])['data']['synotoken'])" "$resp")
   [[ -n "$SID" && -n "$TOKEN" ]] || { echo "ERROR: DSM login failed: $resp" >&2; exit 1; }
@@ -65,7 +77,9 @@ require_ok "enable ssh" "$(api_post SYNO.Core.Terminal 3 set \
 
 echo "== 3. Create shares via synoshare (skips ones that already exist) =="
 # synoshare --add <name> <desc> <path> <na-users> <rw-users> <ro-users> <browsable 0|1> <adv_privilege 0~7>
-sshpass -p "$NAS_PASS" ssh -o StrictHostKeyChecking=accept-new "${NAS_USER}@${NAS_HOST}" "
+# sshpass -e reads SSHPASS from the environment (never argv); the sudo
+# password travels over the encrypted channel on stdin.
+SSHPASS="$NAS_PASS" sshpass -e ssh -o StrictHostKeyChecking=accept-new "${NAS_USER}@${NAS_HOST}" "
   P=\$(cat); S=/usr/syno/sbin/synoshare
   add() {
     if echo \"\$P\" | sudo -S \$S --get \"\$1\" >/dev/null 2>&1; then
@@ -105,8 +119,8 @@ for SHARE in AI_Models Active_Projects Portfolio_Archive; do
 done
 
 echo "== 6. Verify =="
-sshpass -p "$NAS_PASS" ssh "${NAS_USER}@${NAS_HOST}" \
-  "echo '$NAS_PASS' | sudo -S cat /etc/exports" 2>/dev/null | grep -E "volume1" || true
+SSHPASS="$NAS_PASS" sshpass -e ssh "${NAS_USER}@${NAS_HOST}" \
+  'P=$(cat); echo "$P" | sudo -S cat /etc/exports' <<<"$NAS_PASS" 2>/dev/null | grep -E "volume1" || true
 
 echo
 echo "Done. Shares are exported over NFS to the Spark and reachable over SMB"

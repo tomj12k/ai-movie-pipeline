@@ -302,13 +302,15 @@ def cmd_render(a):
             continue
         if pid in hist:
             st = hist[pid].get("status", {})
-            outs = hist[pid].get("outputs", {})
-            if st.get("completed") or outs:
+            if st.get("status_str") == "error":
+                err = [m for m in st.get("messages", []) if m[0] == "execution_error"]
+                detail = err[-1][1].get("exception_message", "")[:400] if err else ""
+                sys.exit(f"✗ render failed on node "
+                         f"{err[-1][1].get('node_type') if err else '?'}: {detail}")
+            if st.get("completed"):
                 print(f"✓ render finished in {time.time()-t0:.0f}s; frames sync "
                       f"to Active_Projects/{a.project}/renders within ~1 min")
                 return
-            if st.get("status_str") == "error":
-                sys.exit(f"✗ render failed: {json.dumps(st)[:500]}")
         print(f"  … {time.time()-t0:.0f}s elapsed")
 
 
