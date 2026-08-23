@@ -175,8 +175,10 @@ plane, placeholder lights matching each shot's lighting note, and a single \
 35mm camera on an animated track that reproduces every camera move across \
 frames 1-240 at 24 fps (keyframe the camera per shot's frame range). \
 Set scene resolution 1920x1080. The script must run cleanly from Blender's \
-Text Editor: never touch bpy.context.space_data or use operators that need a \
-3D-viewport context. Reply with ONLY the Python code.
+Text Editor: never touch bpy.context.space_data, never read \
+bpy.context.active_object (use bpy.context.view_layer.objects.active), and \
+avoid operators that need a 3D-viewport context — prefer bpy.data.objects.new \
+over bpy.ops primitives where practical. Reply with ONLY the Python code.
 
 SHOT LIST:
 {shotlist}"""
