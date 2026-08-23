@@ -249,15 +249,40 @@ def cmd_watch(a):
 
 
 # ------------------------------------------------------------------ render
-def submit_workflow(wf_path: Path, project: str) -> str:
-    graph = json.loads(Path(wf_path).read_text())
-    # Route every save node into the project's folder on the Spark.
+def upload_image(path: Path) -> str:
+    """Multipart POST to ComfyUI /upload/image; returns the server-side name."""
+    boundary = "----studioboundary7355608"
+    data = path.read_bytes()
+    body = (f"--{boundary}\r\nContent-Disposition: form-data; name=\"image\"; "
+            f"filename=\"{path.name}\"\r\nContent-Type: application/octet-stream"
+            f"\r\n\r\n").encode() + data + \
+           (f"\r\n--{boundary}\r\nContent-Disposition: form-data; "
+            f"name=\"overwrite\"\r\n\r\ntrue\r\n--{boundary}--\r\n").encode()
+    req = urllib.request.Request(
+        f"{COMFY_URL}/upload/image", data=body,
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        return json.loads(r.read().decode())["name"]
+
+
+def submit_workflow(wf_path: Path, project: str, image=None,
+                    style_prompt=None, motion_prompt=None) -> str:
+    raw = json.loads(Path(wf_path).read_text())
+    graph = {k: v for k, v in raw.items() if isinstance(v, dict)}  # drop _meta_workflow
+    img_name = upload_image(Path(image)) if image else None
     for node in graph.values():
-        if isinstance(node, dict):
-            ins = node.get("inputs", {})
-            if "filename_prefix" in ins:
-                ins["filename_prefix"] = f"{project}/" + \
-                    Path(str(ins["filename_prefix"])).name
+        ins = node.get("inputs", {})
+        title = node.get("_meta", {}).get("title", "")
+        # Route every save node into the project's folder on the Spark.
+        if "filename_prefix" in ins:
+            ins["filename_prefix"] = f"{project}/" + \
+                Path(str(ins["filename_prefix"])).name
+        if img_name and title == "input_wireframe":
+            ins["image"] = img_name
+        if style_prompt and title == "style_prompt":
+            ins["text"] = style_prompt
+        if motion_prompt and title == "motion_prompt":
+            ins["text"] = motion_prompt
     resp = http_json(f"{COMFY_URL}/prompt", {"prompt": graph})
     pid = resp["prompt_id"]
     print(f"→ submitted to ComfyUI: {pid}")
@@ -265,7 +290,8 @@ def submit_workflow(wf_path: Path, project: str) -> str:
 
 
 def cmd_render(a):
-    pid = submit_workflow(Path(a.workflow), a.project)
+    pid = submit_workflow(Path(a.workflow), a.project, image=a.image,
+                          style_prompt=a.style_prompt, motion_prompt=a.motion_prompt)
     print("… rendering on the Spark (Ctrl-C detaches; render continues)")
     t0 = time.time()
     while True:
@@ -397,6 +423,9 @@ def main():
     s = sub.add_parser("render"); s.set_defaults(fn=cmd_render)
     s.add_argument("--workflow", required=True)
     s.add_argument("--project", required=True)
+    s.add_argument("--image", help="local still (e.g. Blender wireframe) to upload")
+    s.add_argument("--style-prompt", help="override the Krea 2 style prompt")
+    s.add_argument("--motion-prompt", help="override the video motion prompt")
 
     sub.add_parser("clear").set_defaults(fn=cmd_clear)
 

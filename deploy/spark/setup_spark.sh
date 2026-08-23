@@ -37,6 +37,11 @@ echo "== 3. systemd units =="
 sudo install -m 0644 "$HERE"/systemd/*.service "$HERE"/systemd/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 
+# Scoped passwordless restarts so `studio clear` works unattended over SSH.
+sudo bash -c 'printf "pizzacat ALL=(root) NOPASSWD: /usr/bin/systemctl restart comfyui, /usr/bin/systemctl restart vllm-qwen38\n" > /etc/sudoers.d/90-studio-restart \
+  && chmod 440 /etc/sudoers.d/90-studio-restart \
+  && visudo -c -f /etc/sudoers.d/90-studio-restart'
+
 echo "== 4. Migrate manual processes to services =="
 # The long-running manual vLLM and ComfyUI (started from shell scripts) are
 # replaced by the units. pkill is scoped to the exact launch commands.

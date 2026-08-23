@@ -44,15 +44,9 @@ dl Comfy-Org/Wan_2.2_ComfyUI_Repackaged split_files/text_encoders/umt5_xxl_fp8_e
 
 echo "== HunyuanVideo 1.5 720p I2V (motion lane) =="
 dl Comfy-Org/HunyuanVideo_1.5_repackaged split_files/diffusion_models/hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors "$M/unet"
-# Text encoders + VAE for HYV 1.5: pull whatever fp8/vae files the repackage
-# ships (names vary by revision), then flatten into the Comfy folders.
-"$HF" download Comfy-Org/HunyuanVideo_1.5_repackaged \
-  --include "split_files/text_encoders/*" "split_files/vae/*" \
-  --local-dir "$STAGE/Comfy-Org/HunyuanVideo_1.5_repackaged"
-find "$STAGE/Comfy-Org/HunyuanVideo_1.5_repackaged/split_files/text_encoders" -name '*.safetensors' \
-  -exec sh -c 'for f; do [ -f "$HOME/ai/models/clip/$(basename "$f")" ] || mv "$f" "$HOME/ai/models/clip/"; done' _ {} +
-find "$STAGE/Comfy-Org/HunyuanVideo_1.5_repackaged/split_files/vae" -name '*.safetensors' \
-  -exec sh -c 'for f; do [ -f "$HOME/ai/models/vae/$(basename "$f")" ] || mv "$f" "$HOME/ai/models/vae/"; done' _ {} +
+dl Comfy-Org/HunyuanVideo_1.5_repackaged split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors "$M/clip"
+dl Comfy-Org/HunyuanVideo_1.5_repackaged split_files/text_encoders/byt5_small_glyphxl_fp16.safetensors "$M/clip"
+dl Comfy-Org/HunyuanVideo_1.5_repackaged split_files/vae/hunyuanvideo15_vae_fp16.safetensors "$M/vae"
 
 echo "== done =="
 ls -lh "$M/checkpoints" "$M/unet" "$M/clip" "$M/vae"

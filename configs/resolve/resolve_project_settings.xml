@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reference mirror of the studio's Resolve project settings (see
+     RESOLVE_SETUP.md — Resolve itself stores these in its project database;
+     this file documents the exact values for re-creating a project). -->
+<SysConfig>
+  <CachePath>/Users/Shared/Resolve_Cache/CacheClip</CachePath>
+  <GalleryPath>/Users/Shared/Resolve_Cache/.gallery</GalleryPath>
+  <ProxyMediaPath>/Users/tomfisher/StudioProxies</ProxyMediaPath>
+  <ProxyMediaFormat>H.264</ProxyMediaFormat>
+  <ProxyMediaResolution>Half</ProxyMediaResolution>
+  <UseProxyIfAvailable>true</UseProxyIfAvailable>
+  <OptimizedMediaFormat>H.264</OptimizedMediaFormat>
+  <TimelineResolution>1920x1080</TimelineResolution>
+  <TimelineFrameRate>24</TimelineFrameRate>
+  <Database>
+    <Type>PostgreSQL</Type>
+    <Host>spark-d1a9.local</Host>
+    <Port>5432</Port>
+    <Name>resolve_studio</Name>
+    <User>resolve</User>
+    <!-- password: Spark ~/.config/studio/resolve-db.env — never committed -->
+  </Database>
+</SysConfig>
