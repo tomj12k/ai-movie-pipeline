@@ -1,0 +1,12 @@
+[Unit]
+Description=Backup Spark model weights to Synology AI_Models (NAS is the cold copy)
+RequiresMountsFor=/mnt/synology/models
+
+[Service]
+Type=oneshot
+User=pizzacat
+# --delete is intentionally NOT used: the NAS copy is an archive; removing a
+# model from the Spark NVMe must never delete the only remaining copy.
+ExecStart=/usr/bin/rsync -a --partial --exclude '_hf_cache' /home/pizzacat/ai/models/ /mnt/synology/models/spark/
+IOSchedulingClass=idle
+Nice=19

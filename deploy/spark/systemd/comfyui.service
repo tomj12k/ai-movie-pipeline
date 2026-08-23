@@ -1,0 +1,30 @@
+[Unit]
+Description=ComfyUI headless server (Krea 2 / LTX-2.3 / Wan 2.2 / HunyuanVideo 1.5)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pizzacat
+Group=pizzacat
+WorkingDirectory=/home/pizzacat/ai/comfyui/ComfyUI
+Environment=CUDA_VISIBLE_DEVICES=0
+Environment="PATH=/home/pizzacat/ai/comfyui/venv/bin:/usr/local/cuda/bin:/usr/bin:/bin"
+Environment=LD_LIBRARY_PATH=/usr/local/cuda/lib64
+
+# --reserve-vram 30: hard studio guardrail — ComfyUI must always leave 30GB of
+# the unified pool untouched (the GB10 crashes when the pool is exhausted).
+# --disable-pinned-memory: required on GB10 unified memory (owner's tuning).
+ExecStart=/home/pizzacat/ai/comfyui/venv/bin/python3 main.py \
+  --disable-pinned-memory \
+  --reserve-vram 30 \
+  --listen 0.0.0.0 \
+  --port 8188 \
+  --output-directory /home/pizzacat/ai/outputs/pipeline \
+  --extra-model-paths-config /home/pizzacat/ai/comfyui/extra_model_paths.yaml
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

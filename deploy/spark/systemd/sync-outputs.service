@@ -1,0 +1,8 @@
+[Unit]
+Description=Sync ComfyUI render outputs to Synology Active_Projects (per project)
+RequiresMountsFor=/mnt/synology/projects
+
+[Service]
+Type=oneshot
+User=pizzacat
+ExecStart=/home/pizzacat/ai/studio/sync_outputs.sh

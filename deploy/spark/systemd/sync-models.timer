@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly at 03:30: back up model weights to the NAS
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

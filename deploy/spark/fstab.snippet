@@ -1,0 +1,14 @@
+# AI movie pipeline: Synology DS423 NFS mounts for the DGX Spark.
+# Appended to /etc/fstab by setup_spark.sh (idempotent — grep-guarded).
+#
+# Design notes for 1GbE:
+# - NFSv4.1 with 128KB rsize/wsize (NAS caps server-side at 32KB anyway; the
+#   client negotiates down safely).
+# - x-systemd.automount + nofail: the Spark boots cleanly with the NAS off.
+# - noatime: no read-triggered metadata writes across the wire.
+# - These mounts are for projects/archive/sync only. Hot model weights live on
+#   the Spark NVMe (~/ai/models) — never load models over the network.
+
+192.168.68.131:/volume1/AI_Models         /mnt/synology/models    nfs4  nfsvers=4.1,rsize=131072,wsize=131072,noatime,nofail,x-systemd.automount,x-systemd.idle-timeout=600,_netdev  0  0
+192.168.68.131:/volume1/Active_Projects   /mnt/synology/projects  nfs4  nfsvers=4.1,rsize=131072,wsize=131072,noatime,nofail,x-systemd.automount,x-systemd.idle-timeout=600,_netdev  0  0
+192.168.68.131:/volume1/Portfolio_Archive /mnt/synology/archive   nfs4  nfsvers=4.1,rsize=131072,wsize=131072,noatime,nofail,x-systemd.automount,x-systemd.idle-timeout=600,_netdev  0  0

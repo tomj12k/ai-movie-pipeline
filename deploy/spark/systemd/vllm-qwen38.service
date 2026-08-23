@@ -1,0 +1,37 @@
+[Unit]
+Description=vLLM OpenAI server - Qwen3.8-27B FP8 (studio LLM loop)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pizzacat
+Group=pizzacat
+WorkingDirectory=/home/pizzacat/ai/llm
+
+# Wraps the owner's tuned launcher. All studio-specific overrides live here.
+#
+# MEMORY GUARDRAIL: the GB10 has ~130.7GB unified memory shared by CPU+GPU.
+# The studio requires >=30GB kept free at all times. Budget:
+#   vLLM        0.40 x 130.7  = ~52GB   (FP8 weights ~27GB + MTP + ~24GB KV)
+#   ComfyUI     peak ~40GB    (LTX-2.3 / Wan 2.2 lanes, --reserve-vram 30)
+#   OS + misc   ~6GB
+#   free        >=30GB
+# Do not raise QWEN38_GPU_MEM_UTIL above 0.40 while ComfyUI shares the box.
+Environment=QWEN38_VENV=/home/pizzacat/ai/llm/venv027
+Environment=QWEN38_MODEL_PATH=/home/pizzacat/ai/models/llm/qwen3.8-27b-fp8
+Environment=QWEN38_SERVED_NAME=Qwen3.8-27B
+Environment=QWEN38_PORT=8000
+Environment=QWEN38_MAX_MODEL_LEN=131072
+Environment=QWEN38_GPU_MEM_UTIL=0.40
+Environment=QWEN38_TEXT_ONLY=1
+Environment=QWEN38_MAX_BATCHED_TOKENS=8192
+ExecStart=/home/pizzacat/ai/llm/start_qwen38.sh
+Restart=on-failure
+RestartSec=15
+# Model load on GB10 takes several minutes; don't let systemd kill a slow start.
+TimeoutStartSec=1200
+TimeoutStopSec=60
+
+[Install]
+WantedBy=multi-user.target

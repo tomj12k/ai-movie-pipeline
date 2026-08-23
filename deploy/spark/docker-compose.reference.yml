@@ -1,0 +1,62 @@
+# REFERENCE ONLY — containerized alternative to the native systemd deployment.
+#
+# The studio runs vLLM and ComfyUI natively on the Spark (see systemd/) because
+# the native install is tuned for the GB10 (MTP speculative decoding, pinned-
+# memory workarounds) and shares the box with other projects. Keep this file as
+# the rebuild-from-scratch path or for isolating a second stack.
+#
+# ARM64 notes for the GB10 (sm_121, aarch64):
+# - Docker Hub `vllm/vllm-openai` has no `latest-arm64` tag. Use NVIDIA's NGC
+#   build for DGX Spark instead (see NVIDIA/dgx-spark-playbooks): pick the
+#   current tag from https://catalog.ngc.nvidia.com/orgs/nvidia/containers/vllm
+# - There is no official ComfyUI image for GB10; the service below builds from
+#   the community-maintained Spark-optimized repo (Triplany/comfyui-dgx-spark).
+# - MEMORY GUARDRAIL: keep vLLM's utilization + ComfyUI's reserve aligned with
+#   the native units — at least 30GB of the 128GB unified pool stays free.
+
+services:
+  vllm-server:
+    image: nvcr.io/nvidia/vllm:26.05-py3   # check NGC for the current tag
+    container_name: vllm-server
+    restart: unless-stopped
+    ipc: host
+    gpus: all
+    ports:
+      - "8000:8000"
+    environment:
+      HF_HOME: /models/llm/_hf_cache
+    volumes:
+      - /home/pizzacat/ai/models:/models
+    command: >
+      vllm serve /models/llm/qwen3.8-27b-fp8
+      --host 0.0.0.0 --port 8000
+      --served-model-name Qwen3.8-27B
+      --max-model-len 131072
+      --max-num-seqs 64
+      --gpu-memory-utilization 0.40
+      --enable-prefix-caching
+      --trust-remote-code
+      --enable-auto-tool-choice
+      --tool-call-parser qwen3_coder
+      --language-model-only
+      --max-num-batched-tokens 8192
+
+  comfyui-server:
+    build:
+      context: https://github.com/Triplany/comfyui-dgx-spark.git
+    container_name: comfyui-server
+    restart: unless-stopped
+    ipc: host
+    gpus: all
+    ports:
+      - "8188:8188"
+    volumes:
+      - /home/pizzacat/ai/models:/models
+      - /home/pizzacat/ai/outputs/pipeline:/output
+      - /mnt/synology/projects:/projects
+    command: >
+      python3 main.py
+      --disable-pinned-memory
+      --reserve-vram 30
+      --listen 0.0.0.0 --port 8188
+      --output-directory /output

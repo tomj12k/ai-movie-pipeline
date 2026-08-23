@@ -1,0 +1,10 @@
+[Unit]
+Description=Every minute: push finished render frames to the NAS in the background
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=15s
+
+[Install]
+WantedBy=timers.target

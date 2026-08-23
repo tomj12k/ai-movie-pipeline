@@ -1,0 +1,34 @@
+# Shared DaVinci Resolve project library — PostgreSQL 13 on the DGX Spark.
+#
+# Why here and not the NAS: the DS423 (ARM Realtek) has no Container Manager.
+# The Spark already runs Docker 24/7, so it hosts the studio's shared database.
+# Resolve 18/19/20 network project libraries require PostgreSQL 13 specifically.
+#
+# PGDATA is namespaced per studio ("PGDATA: .../studio_main") so additional
+# libraries (per user or per show) can be added later as siblings without a
+# second container. Data lives on Spark NVMe; resolve-db-backup.sh dumps
+# nightly to the NAS Portfolio_Archive share.
+#
+# Start:  docker compose --env-file ~/.config/studio/resolve-db.env up -d
+# The env file provides RESOLVE_DB_PASS (never committed).
+
+services:
+  resolve-db:
+    image: postgres:13
+    container_name: resolve-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: resolve
+      POSTGRES_PASSWORD: ${RESOLVE_DB_PASS}
+      POSTGRES_DB: resolve_studio
+      PGDATA: /var/lib/postgresql/data/studio_main
+    volumes:
+      - /home/pizzacat/ai/resolve-db/data:/var/lib/postgresql/data
+    shm_size: 256mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resolve -d resolve_studio"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
