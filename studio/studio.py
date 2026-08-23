@@ -472,6 +472,10 @@ def main():
     s = sub.add_parser("sync-local"); s.set_defaults(fn=cmd_sync)
     s.add_argument("--project", required=True)
 
+    s = sub.add_parser("pipeline", help="run all stages with visual checkpoints")
+    s.set_defaults(fn=lambda a: __import__("pipeline").main(a.rest))
+    s.add_argument("rest", nargs=argparse.REMAINDER)
+
     a = p.parse_args()
     try:
         a.fn(a)
