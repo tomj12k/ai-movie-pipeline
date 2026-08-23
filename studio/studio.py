@@ -174,7 +174,9 @@ boxes for every subject/prop (correct relative scale/position), a ground \
 plane, placeholder lights matching each shot's lighting note, and a single \
 35mm camera on an animated track that reproduces every camera move across \
 frames 1-240 at 24 fps (keyframe the camera per shot's frame range). \
-Set scene resolution 1920x1080. Reply with ONLY the Python code.
+Set scene resolution 1920x1080. The script must run cleanly from Blender's \
+Text Editor: never touch bpy.context.space_data or use operators that need a \
+3D-viewport context. Reply with ONLY the Python code.
 
 SHOT LIST:
 {shotlist}"""
@@ -200,6 +202,10 @@ def cmd_codegen(a):
     m = re.search(r"```(?:python)?\n(.*?)```", code, re.S)
     if m:
         code = m.group(1)
+    elif code.startswith("```"):
+        # Unclosed fence (model hit its token budget or just omitted the
+        # closing fence): drop the fence line, keep everything after it.
+        code = code.split("\n", 1)[1] if "\n" in code else ""
     out = proj / "blender_layout.py"
     out.write_text(code)
     try:
