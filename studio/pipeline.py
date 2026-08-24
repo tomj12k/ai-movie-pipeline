@@ -143,24 +143,60 @@ def newest_take(renders: Path, sid: str):
     return takes[-1] if takes else None
 
 
+def valid_clip(p: Path, min_dur=9.0) -> bool:
+    """The NAS sync can copy a clip mid-write; only trust a clip whose
+    container probes complete and near full length."""
+    if p is None or not p.is_file():
+        return False
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                        "format=duration", "-of", "csv=p=0", str(p)],
+                       capture_output=True, text=True)
+    try:
+        return float(r.stdout.strip()) >= min_dur
+    except ValueError:
+        return False
+
+
+def wait_valid_take(renders: Path, sid: str, tries=24, delay=10):
+    for _ in range(tries):
+        p = newest_take(renders, sid)
+        if valid_clip(p):
+            return p
+        time.sleep(delay)
+    return None
+
+
 def stage_render(proj, shots, rv, a):
     renders = proj / "renders"
     prev_mp4 = None
-    for shot in shots:
+    for idx, shot in enumerate(shots):
         sid = shot["id"]
+        if getattr(a, "resume", False) and valid_clip(newest_take(renders, sid)):
+            prev_mp4 = newest_take(renders, sid)
+            print(f"  {sid}: take exists — skipping (--resume)")
+            continue
         src = shot.get("input_image", f"{sid}_wireframe.png")
         if src == "chain":
             # World-continuity chaining: this shot starts from the final frame
             # of the previous shot's clip, so locations flow instead of jumping.
-            if prev_mp4 is None:
-                prev_mp4 = newest_take(renders, shots[shots.index(shot) - 1]["id"])
-            if prev_mp4 is None:
-                print(f"  !! {sid}: no previous clip to chain from — skipping")
+            if not valid_clip(prev_mp4) and idx > 0:
+                prev_mp4 = wait_valid_take(renders, shots[idx - 1]["id"])
+            if not valid_clip(prev_mp4):
+                print(f"  !! {sid}: no complete previous clip to chain from — skipping")
                 continue
             img = proj / f"chain_{sid}.png"
-            subprocess.run(["ffmpeg", "-y", "-v", "error", "-sseof", "-0.15",
-                            "-i", str(prev_mp4), "-frames:v", "1", str(img)],
-                           check=True)
+            ok = False
+            for _ in range(6):
+                r = subprocess.run(["ffmpeg", "-y", "-v", "error", "-sseof", "-0.15",
+                                    "-i", str(prev_mp4), "-frames:v", "1", str(img)],
+                                   capture_output=True)
+                if r.returncode == 0 and img.is_file():
+                    ok = True
+                    break
+                time.sleep(15)
+            if not ok:
+                print(f"  !! {sid}: chain frame extraction kept failing — skipping")
+                continue
         else:
             img = proj / src
         existing = newest_take(renders, sid)
@@ -187,7 +223,7 @@ def stage_render(proj, shots, rv, a):
                 if stt.get("completed"):
                     for _ in range(18):   # wait for the 1-min NAS sync
                         mp4 = newest_take(renders, sid)
-                        if mp4 and mp4 != existing:
+                        if mp4 and mp4 != existing and valid_clip(mp4):
                             prev_mp4 = mp4
                             for still in _stills(mp4, rv.dir, f"{sid}"):
                                 rv.add("render", f"{sid} {still.stem.split('_')[-1]}%", still)
@@ -314,6 +350,8 @@ def main(argv=None):
     p.add_argument("--only", choices=STAGES, help="run a single stage")
     p.add_argument("--auto", action="store_true",
                    help="no pauses; you still get notifications + the sheet")
+    p.add_argument("--resume", action="store_true",
+                   help="skip shots that already have a complete take")
     a = p.parse_args(argv)
 
     proj = st.projects_root() / a.project
