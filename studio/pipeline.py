@@ -277,15 +277,17 @@ def stage_assemble(proj, shots, rv, a):
     # segment's audio is loudness-normalized, runs XF seconds past its picture
     # cut, and crossfades into the next shot (J-cut), with fades at both ends.
     XF = 0.30
+    work = Path.home() / "StudioProxies" / a.project / "assemble_work"
+    work.mkdir(parents=True, exist_ok=True)
     segs, auds, durs = [], [], []
     for shot, clip in pairs:
         dur = shot.get("trim_frames", 48) / 24.0
-        seg = rv.dir / f"seg_{shot['id']}.mp4"
+        seg = work / f"seg_{shot['id']}.mp4"
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(clip),
                         "-t", f"{dur:.4f}", "-r", "24", "-an",
                         "-c:v", "libx264", "-preset", "fast", "-crf", "18",
                         str(seg)], check=True)
-        aud = rv.dir / f"aud_{shot['id']}.wav"
+        aud = work / f"aud_{shot['id']}.wav"
         has_audio = bool(subprocess.run(
             ["ffprobe", "-v", "error", "-select_streams", "a",
              "-show_entries", "stream=index", "-of", "csv=p=0", str(clip)],
@@ -298,9 +300,9 @@ def stage_assemble(proj, shots, rv, a):
                         "-ar", "48000", "-ac", "2", str(aud)], check=True)
         segs.append(seg); auds.append(aud); durs.append(dur)
 
-    lst = rv.dir / "concat.txt"
+    lst = work / "concat.txt"
     lst.write_text("".join(f"file '{s}'\n" for s in segs))
-    vid_only = rv.dir / "video_only.mp4"
+    vid_only = work / "video_only.mp4"
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0",
                     "-i", str(lst), "-c", "copy", str(vid_only)], check=True)
 
@@ -311,7 +313,7 @@ def stage_assemble(proj, shots, rv, a):
         fc.append(f"{cur}[{i}:a]acrossfade=d={XF}:c1=tri:c2=tri{out}")
         cur = out
     fc.append(f"{cur}afade=t=in:d=0.2,afade=t=out:st={total - 0.4:.3f}:d=0.4[aout]")
-    mixed = rv.dir / "audio_mix.wav"
+    mixed = work / "audio_mix.wav"
     cmd = ["ffmpeg", "-y", "-v", "error"]
     for af in auds:
         cmd += ["-i", str(af)]
