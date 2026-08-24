@@ -169,11 +169,16 @@ def wait_valid_take(renders: Path, sid: str, tries=24, delay=10):
 def stage_render(proj, shots, rv, a):
     renders = proj / "renders"
     prev_mp4 = None
+    only = set(getattr(a, "shots", "").split(",")) - {""} if getattr(a, "shots", None) else None
     for idx, shot in enumerate(shots):
         sid = shot["id"]
-        if getattr(a, "resume", False) and valid_clip(newest_take(renders, sid)):
-            prev_mp4 = newest_take(renders, sid)
-            print(f"  {sid}: take exists — skipping (--resume)")
+        skip = (getattr(a, "resume", False) and valid_clip(newest_take(renders, sid))) \
+               or (only is not None and sid not in only)
+        if skip:
+            t = newest_take(renders, sid)
+            if valid_clip(t):
+                prev_mp4 = t          # keep the chain intact across skips
+            print(f"  {sid}: skipped")
             continue
         src = shot.get("input_image", f"{sid}_wireframe.png")
         if src == "chain":
@@ -352,6 +357,7 @@ def main(argv=None):
                    help="no pauses; you still get notifications + the sheet")
     p.add_argument("--resume", action="store_true",
                    help="skip shots that already have a complete take")
+    p.add_argument("--shots", help="retake only these shot ids, e.g. s07,s08,s09")
     a = p.parse_args(argv)
 
     proj = st.projects_root() / a.project
