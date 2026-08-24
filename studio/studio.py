@@ -292,7 +292,10 @@ def resolve_workflow(wf: str) -> Path:
 
 
 def submit_workflow(wf_path, project: str, image=None,
-                    style_prompt=None, motion_prompt=None, seed=None) -> str:
+                    style_prompt=None, motion_prompt=None, seed=None,
+                    prefix=None) -> str:
+    """prefix names the output files (e.g. 's04_take' -> s04_take_00001_.mp4,
+    retakes increment the counter under the same shot name)."""
     raw = json.loads(resolve_workflow(str(wf_path)).read_text())
     graph = {k: v for k, v in raw.items() if isinstance(v, dict)}  # drop _meta_workflow
     img_name = upload_image(Path(image)) if image else None
@@ -301,8 +304,10 @@ def submit_workflow(wf_path, project: str, image=None,
         title = node.get("_meta", {}).get("title", "")
         # Route every save node into the project's folder on the Spark.
         if "filename_prefix" in ins:
-            ins["filename_prefix"] = f"{project}/" + \
-                Path(str(ins["filename_prefix"])).name
+            base = prefix or Path(str(ins["filename_prefix"])).name
+            if prefix and node.get("class_type") == "SaveImage":
+                base = f"{prefix}_frame"      # keep style frames distinct
+            ins["filename_prefix"] = f"{project}/{base}"
         if img_name and title == "input_wireframe":
             ins["image"] = img_name
         if style_prompt and title == "style_prompt":
@@ -324,7 +329,7 @@ def submit_workflow(wf_path, project: str, image=None,
 def cmd_render(a):
     pid = submit_workflow(Path(a.workflow), a.project, image=a.image,
                           style_prompt=a.style_prompt, motion_prompt=a.motion_prompt,
-                          seed=a.seed)
+                          seed=a.seed, prefix=a.prefix)
     print("… rendering on the Spark (Ctrl-C detaches; render continues)")
     t0 = time.time()
     while True:
@@ -477,6 +482,7 @@ def main():
     s.add_argument("--style-prompt", help="override the Krea 2 style prompt")
     s.add_argument("--motion-prompt", help="override the video motion prompt")
     s.add_argument("--seed", type=int, help="override every sampler seed in the graph")
+    s.add_argument("--prefix", help="output filename prefix, e.g. s04_take")
 
     sub.add_parser("clear").set_defaults(fn=cmd_clear)
 

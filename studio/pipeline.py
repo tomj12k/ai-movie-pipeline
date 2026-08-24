@@ -138,20 +138,39 @@ def _stills(mp4: Path, outdir: Path, base: str):
     return outs
 
 
+def newest_take(renders: Path, sid: str):
+    takes = sorted(renders.glob(f"{sid}_take_*.mp4")) if renders.is_dir() else []
+    return takes[-1] if takes else None
+
+
 def stage_render(proj, shots, rv, a):
     renders = proj / "renders"
+    prev_mp4 = None
     for shot in shots:
         sid = shot["id"]
-        before = set(renders.glob("*.mp4")) if renders.is_dir() else set()
-        # A shot may override its i2i input ("input_image"), e.g. a frame pulled
-        # from the previous shot's render for hard character continuity.
-        img = proj / shot.get("input_image", f"{sid}_wireframe.png")
+        src = shot.get("input_image", f"{sid}_wireframe.png")
+        if src == "chain":
+            # World-continuity chaining: this shot starts from the final frame
+            # of the previous shot's clip, so locations flow instead of jumping.
+            if prev_mp4 is None:
+                prev_mp4 = newest_take(renders, shots[shots.index(shot) - 1]["id"])
+            if prev_mp4 is None:
+                print(f"  !! {sid}: no previous clip to chain from — skipping")
+                continue
+            img = proj / f"chain_{sid}.png"
+            subprocess.run(["ffmpeg", "-y", "-v", "error", "-sseof", "-0.15",
+                            "-i", str(prev_mp4), "-frames:v", "1", str(img)],
+                           check=True)
+        else:
+            img = proj / src
+        existing = newest_take(renders, sid)
         pid = st.submit_workflow(shot.get("workflow", "krea2_niko_ltx_pipeline"),
                                  a.project,
                                  image=img,
                                  style_prompt=shot["style_prompt"],
                                  motion_prompt=shot["motion_prompt"],
-                                 seed=shot.get("seed"))
+                                 seed=shot.get("seed"),
+                                 prefix=f"{sid}_take")
         print(f"  {sid}: rendering ({pid})…")
         while True:
             time.sleep(10)
@@ -167,9 +186,9 @@ def stage_render(proj, shots, rv, a):
                     break
                 if stt.get("completed"):
                     for _ in range(18):   # wait for the 1-min NAS sync
-                        new = (set(renders.glob("*.mp4")) - before) if renders.is_dir() else set()
-                        if new:
-                            mp4 = max(new, key=lambda p: p.stat().st_mtime)
+                        mp4 = newest_take(renders, sid)
+                        if mp4 and mp4 != existing:
+                            prev_mp4 = mp4
                             for still in _stills(mp4, rv.dir, f"{sid}"):
                                 rv.add("render", f"{sid} {still.stem.split('_')[-1]}%", still)
                             break
@@ -201,10 +220,13 @@ def stage_assemble(proj, shots, rv, a):
     ordered = sorted(raw.glob("reel_*.mp4"))
     pairs = []
     for i, shot in enumerate(shots):
-        # A shot may pin its clip explicitly ("clip": "reel_ltx_00007_.mp4"),
-        # e.g. after a re-render; otherwise clips map positionally.
-        clip = raw / shot["clip"] if shot.get("clip") else \
-               (ordered[i] if i < len(ordered) else None)
+        # Resolution order: explicit "clip" pin > newest <sid>_take_*.mp4 >
+        # positional legacy (reel_* numbering).
+        if shot.get("clip"):
+            clip = raw / shot["clip"]
+        else:
+            clip = newest_take(raw, shot["id"]) or \
+                   (ordered[i] if i < len(ordered) else None)
         if clip is None or not clip.is_file():
             print(f"  !! no clip for {shot['id']} — skipping it in the draft")
             continue
