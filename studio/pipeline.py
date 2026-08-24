@@ -283,8 +283,9 @@ def stage_assemble(proj, shots, rv, a):
     for shot, clip in pairs:
         dur = shot.get("trim_frames", 48) / 24.0
         seg = work / f"seg_{shot['id']}.mp4"
+        frames = int(shot.get("trim_frames", 48))
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(clip),
-                        "-t", f"{dur:.4f}", "-r", "24", "-an",
+                        "-vf", "fps=24", "-frames:v", str(frames), "-an",
                         "-c:v", "libx264", "-preset", "fast", "-crf", "18",
                         str(seg)], check=True)
         aud = work / f"aud_{shot['id']}.wav"
