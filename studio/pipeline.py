@@ -297,7 +297,7 @@ def stage_assemble(proj, shots, rv, a):
         src = ["-i", str(clip)] if has_audio else \
               ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
         subprocess.run(["ffmpeg", "-y", "-v", "error"] + src +
-                       ["-t", f"{dur + XF:.4f}",
+                       ["-t", f"{dur:.4f}",
                         "-af", "loudnorm=I=-18:TP=-1.5:LRA=9",
                         "-ar", "48000", "-ac", "2", str(aud)], check=True)
         segs.append(seg); auds.append(aud); durs.append(dur)
