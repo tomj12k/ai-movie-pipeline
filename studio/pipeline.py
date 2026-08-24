@@ -277,7 +277,7 @@ def stage_assemble(proj, shots, rv, a):
     # sound world, so raw concat resets tone/level at each cut — instead each
     # segment's audio is loudness-normalized, runs XF seconds past its picture
     # cut, and crossfades into the next shot (J-cut), with fades at both ends.
-    XF = 0.30
+    XF = 0.20
     work = Path.home() / "StudioProxies" / a.project / "assemble_work"
     work.mkdir(parents=True, exist_ok=True)
     segs, auds, durs = [], [], []
@@ -302,26 +302,27 @@ def stage_assemble(proj, shots, rv, a):
                         "-ar", "48000", "-ac", "2", str(aud)], check=True)
         segs.append(seg); auds.append(aud); durs.append(dur)
 
-    lst = work / "concat.txt"
-    lst.write_text("".join(f"file '{s}'\n" for s in segs))
+    # Video: 0.2s crossfade at every boundary. Chained shots start where the
+    # previous frame ended, so the dissolve reads as continuous motion.
+    XFV = 0.20
     vid_only = work / "video_only.mp4"
-    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0",
-                    "-i", str(lst), "-c", "copy", str(vid_only)], check=True)
-
-    total = sum(durs)
-    fc, cur = [], "[0:a]"
-    for i in range(1, len(auds)):
-        out = f"[x{i}]"
-        fc.append(f"{cur}[{i}:a]acrossfade=d={XF}:c1=tri:c2=tri{out}")
-        cur = out
-    fc.append(f"{cur}afade=t=in:d=0.2,afade=t=out:st={total - 0.4:.3f}:d=0.4[aout]")
-    mixed = work / "audio_mix.wav"
-    cmd = ["ffmpeg", "-y", "-v", "error"]
-    for af in auds:
-        cmd += ["-i", str(af)]
-    cmd += ["-filter_complex", ";".join(fc), "-map", "[aout]",
-            "-t", f"{total:.4f}", str(mixed)]
-    subprocess.run(cmd, check=True)
+    if len(segs) == 1:
+        shutil.copyfile(segs[0], vid_only)
+        total = durs[0]
+    else:
+        fc, cur, t = [], "[0:v]", 0.0
+        for i in range(1, len(segs)):
+            t += durs[i - 1] - XFV
+            out = f"[v{i}]"
+            fc.append(f"{cur}[{i}:v]xfade=transition=fade:duration={XFV}:offset={t:.4f}{out}")
+            cur = out
+        cmd = ["ffmpeg", "-y", "-v", "error"]
+        for s_ in segs:
+            cmd += ["-i", str(s_)]
+        cmd += ["-filter_complex", ";".join(fc), "-map", cur,
+                "-c:v", "libx264", "-preset", "fast", "-crf", "18", str(vid_only)]
+        subprocess.run(cmd, check=True)
+        total = sum(durs) - XFV * (len(segs) - 1)
 
     draft = proj / "draft_reel.mp4"
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(vid_only),
