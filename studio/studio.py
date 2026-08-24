@@ -293,7 +293,7 @@ def resolve_workflow(wf: str) -> Path:
 
 def submit_workflow(wf_path, project: str, image=None,
                     style_prompt=None, motion_prompt=None, seed=None,
-                    prefix=None) -> str:
+                    prefix=None, krea_denoise=None) -> str:
     """prefix names the output files (e.g. 's04_take' -> s04_take_00001_.mp4,
     retakes increment the counter under the same shot name)."""
     raw = json.loads(resolve_workflow(str(wf_path)).read_text())
@@ -320,6 +320,8 @@ def submit_workflow(wf_path, project: str, image=None,
             for k in ("seed", "noise_seed"):
                 if k in ins:
                     ins[k] = int(seed)
+        if krea_denoise is not None and title == "krea2 restyle (i2i)":
+            ins["denoise"] = float(krea_denoise)
     resp = http_json(f"{COMFY_URL}/prompt", {"prompt": graph})
     pid = resp["prompt_id"]
     print(f"→ submitted to ComfyUI: {pid}")

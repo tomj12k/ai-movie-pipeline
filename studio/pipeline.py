@@ -211,7 +211,8 @@ def stage_render(proj, shots, rv, a):
                                  style_prompt=shot["style_prompt"],
                                  motion_prompt=shot["motion_prompt"],
                                  seed=shot.get("seed"),
-                                 prefix=f"{sid}_take")
+                                 prefix=f"{sid}_take",
+                                 krea_denoise=shot.get("krea_denoise"))
         print(f"  {sid}: rendering ({pid})…")
         while True:
             time.sleep(10)
