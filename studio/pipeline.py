@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import studio as st
 
 BLENDER = "/Applications/Blender.app/Contents/MacOS/Blender"
-STAGES = ["wireframes", "render", "proxies", "assemble", "mix", "qa"]
+STAGES = ["wireframes", "render", "proxies", "assemble", "mix", "qa", "audit"]
 
 
 def notify(msg):
@@ -407,6 +407,31 @@ def stage_qa(proj, shots, rv, a):
     print(f"\n■ QA report: {proj / 'qa_report.md'}")
 
 
+def stage_audit(proj, shots, rv, a):
+    """Distill the QA reports into a verdict; with --fix, retake the flagged
+    shots and re-run assemble→mix→qa, up to 2 cycles."""
+    import qa_checks
+    for cycle in range(3):
+        v = qa_checks.audit_verdict(proj)
+        print(f"■ audit: {v['verdict']} — {v['summary']}")
+        if v["retake_shots"]:
+            print(f"  retake: {', '.join(v['retake_shots'])}")
+        if v["audio_issues"]:
+            print("  audio: " + "; ".join(v["audio_issues"]))
+        notify(f"Audit {v['verdict']}: {v['summary'][:80]}")
+        if v["verdict"] != "FIX" or not a.fix or cycle == 2:
+            return
+        known = {s["id"] for s in shots}
+        retakes = [r for r in v["retake_shots"] if r in known]
+        if not retakes:
+            return
+        print(f"━━ audit fix cycle {cycle + 1}: retaking {retakes} ━━")
+        a.shots = ",".join(retakes)
+        for fix_stage in (stage_render, stage_proxies, stage_assemble,
+                          stage_mix, stage_qa):
+            fix_stage(proj, shots, rv, a)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="studio pipeline", description=__doc__)
     p.add_argument("--project", required=True)
@@ -418,6 +443,9 @@ def main(argv=None):
     p.add_argument("--resume", action="store_true",
                    help="skip shots that already have a complete take")
     p.add_argument("--shots", help="retake only these shot ids, e.g. s07,s08,s09")
+    p.add_argument("--fix", action="store_true",
+                   help="let the audit stage auto-retake flagged shots and "
+                        "re-QA (max 2 cycles)")
     a = p.parse_args(argv)
 
     proj = st.projects_root() / a.project
@@ -429,7 +457,8 @@ def main(argv=None):
         print(f"\n━━ stage: {stage} ━━")
         {"wireframes": stage_wireframes, "render": stage_render,
          "proxies": stage_proxies, "assemble": stage_assemble,
-         "mix": stage_mix, "qa": stage_qa}[stage](proj, shots, rv, a)
+         "mix": stage_mix, "qa": stage_qa,
+         "audit": stage_audit}[stage](proj, shots, rv, a)
     notify("Pipeline complete")
     print("\n✓ pipeline complete — review sheet:", rv.dir / "index.html")
 

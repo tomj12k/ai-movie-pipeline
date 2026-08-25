@@ -8,6 +8,7 @@ Checks encode what the human audits kept finding:
   - dense strips: 5 frames per clip, for character/style drift review
 Results land in <project>/review/ and qa_machine_report.md.
 """
+import json
 import re
 import subprocess
 from pathlib import Path
@@ -140,6 +141,36 @@ def visual_checklist_qa(proj: Path) -> Path | None:
     except (subprocess.TimeoutExpired, FileNotFoundError) as e:
         report.write_text(f"visual checklist QA unavailable: {e}\n")
     return report
+
+
+AUDIT_PROMPT = """Read the QA reports in this directory: qa_machine_report.md \
+(signal stats + speech sweep), qa_visual_report.md (continuity checklist over \
+contact sheets), and qa_report.md (full film review). Scene rows/clips map to \
+shot ids p01..p15 in story order. Synthesize ONE verdict. Output STRICT JSON \
+only, no prose, exactly this shape:
+{"verdict": "SHIP" or "FIX", "retake_shots": ["p03"], "audio_issues": \
+["..."], "summary": "one sentence"}
+List a shot in retake_shots only for critical visual defects (duplicates, \
+merges, wrong character design, style breaks). Minor nits do not block SHIP."""
+
+
+def audit_verdict(proj: Path) -> dict:
+    """Distill the QA reports into a machine-actionable verdict."""
+    fallback = {"verdict": "MANUAL", "retake_shots": [], "audio_issues": [],
+                "summary": "audit LLM unavailable — read the QA reports"}
+    try:
+        r = subprocess.run(
+            ["agy", "--sandbox", "--dangerously-skip-permissions",
+             "-p", AUDIT_PROMPT],
+            capture_output=True, text=True, timeout=1200, cwd=proj)
+        m = re.search(r"\{.*\}", r.stdout, re.DOTALL)
+        v = json.loads(m.group(0)) if m else fallback
+        if v.get("verdict") not in ("SHIP", "FIX"):
+            v = fallback
+    except Exception as e:
+        v = dict(fallback, summary=f"audit failed: {e}")
+    (proj / "audit_findings.json").write_text(json.dumps(v, indent=1))
+    return v
 
 
 def run_machine_qa(proj: Path, project: str, shots: list) -> Path:
