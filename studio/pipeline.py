@@ -304,10 +304,21 @@ def stage_assemble(proj, shots, rv, a):
                        ["-vn", "-t", f"{dur:.4f}",
                         "-af", "loudnorm=I=-18:TP=-1.5:LRA=9",
                         "-ar", "48000", "-ac", "2", str(aud_ln)], check=True)
+        # LTX audio latents run ~4% short of the video (25fps audio vs 24fps
+        # frames), which made foley go silent before each cut. Stretch the
+        # normalized audio (pitch-preserving) to fill the video duration, then
+        # pad against the silence bed as a safety net.
+        adur = float(subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "csv=p=0", str(aud_ln)],
+            capture_output=True, text=True).stdout.strip() or dur)
+        tempo = max(0.5, min(2.0, adur / dur))
+        stretch = f"[0:a]atempo={tempo:.6f}[a0];" if adur < dur * 0.995 else "[0:a]anull[a0];"
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(aud_ln),
                         "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
                         "-filter_complex",
-                        f"[1:a]atrim=0:{dur:.4f}[s];[0:a][s]amix=inputs=2:duration=longest:normalize=0[out]",
+                        stretch +
+                        f"[1:a]atrim=0:{dur:.4f}[s];[a0][s]amix=inputs=2:duration=longest:normalize=0[out]",
                         "-map", "[out]", "-t", f"{dur:.4f}", str(aud)], check=True)
         segs.append(seg); auds.append(aud); durs.append(dur)
 
