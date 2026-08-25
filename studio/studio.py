@@ -399,7 +399,7 @@ def cmd_qa(a):
     r = run([tool, "--sandbox", "--dangerously-skip-permissions", "-p",
              QA_PROMPT.format(path=target)] if tool == "agy" else
             [tool, "-p", QA_PROMPT.format(path=target)],
-            timeout=900, cwd=target.parent)
+            timeout=2400, cwd=target.parent)
     if r.returncode != 0:
         sys.exit(f"{tool} failed: {(r.stderr or r.stdout).strip()[:400]}")
     report = projects_root() / a.project / "qa_report.md"
