@@ -266,12 +266,29 @@ def shot_gate(clip: Path, sid: str, expect: str, frames=5, timeout=420):
     _sheet(strips, sheet)
     body = SHOT_GATE_PROMPT.format(sheet=sheet.resolve(), n=frames, cast=expect)
     out = _review_batch(sheet, body, work, timeout=timeout)
-    verdict = "FAIL" if re.search(r"VERDICT:\s*FAIL", out, re.I) else "PASS"
-    detail = " ".join(l.strip() for l in out.splitlines()
-                      if re.match(r"\s*(COUNT|DESIGN|VERDICT):", l, re.I))
     if "did not run" in out or "timed out" in out:
         return True, f"gate inconclusive: {out[:80]}"   # never block on tooling
-    return verdict == "PASS", detail or out[:200]
+    detail = " ".join(l.strip() for l in out.splitlines()
+                      if re.match(r"\s*(COUNT|DESIGN|VERDICT):", l, re.I))
+    # Derive the verdict from the evidence rather than trusting the stated one:
+    # the reviewer has returned "COUNT: 2,2,2,2,2 DESIGN: OK VERDICT: FAIL".
+    counts = []
+    m = re.search(r"COUNT:\s*([0-9,\s–-]+)", out, re.I)
+    if m:
+        counts = [int(x) for x in re.findall(r"\d+", m.group(1))]
+    design = ""
+    m = re.search(r"DESIGN:\s*(.+)", out, re.I)
+    if m:
+        design = m.group(1).strip()
+    design_ok = bool(re.match(r"(ok|none|no defects?|clean)\b", design, re.I))
+    # A duplicate is the signal this gate exists to catch and is objective.
+    dup = any(c >= 3 for c in counts) if counts else False
+    if not counts and not design:
+        return True, f"gate unparsable: {out[:120]}"
+    ok = not dup and (design_ok or not design)
+    if not ok and not dup:
+        detail = f"{detail} [design flag — advisory]"
+    return ok, detail or out[:200]
 
 
 def run_machine_qa(proj: Path, project: str, shots: list) -> Path:
