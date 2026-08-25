@@ -390,6 +390,9 @@ def stage_qa(proj, shots, rv, a):
     import qa_checks
     try:
         qa_checks.run_machine_qa(proj, a.project, shots)
+        rep = qa_checks.visual_checklist_qa(proj)
+        if rep:
+            print(f"■ visual checklist: {rep}")
     except Exception as e:  # machine QA must never block the LLM review
         print(f"machine QA failed: {e}")
     r = subprocess.run([sys.executable, str(Path(st.__file__)), "qa",

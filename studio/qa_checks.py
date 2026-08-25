@@ -96,6 +96,52 @@ def dense_strips(clips: list, outdir: Path) -> list:
     return strips
 
 
+def _vstack(strips: list, out: Path):
+    cmd = ["ffmpeg", "-y", "-v", "error"]
+    for s in strips:
+        cmd += ["-i", str(s)]
+    cmd += ["-filter_complex", f"vstack={len(strips)}", str(out)]
+    subprocess.run(cmd, check=True)
+
+
+CHECKLIST = """You are a continuity supervisor for a 3D animated film about \
+Niko (small white robot bunny: dark face-screen with yellow ring eyes, cyan \
+ear light-strips, cyan chest ring, ONE small round white puff tail) and Pip \
+(palm-sized white sphere drone: two ear-fins, twin yellow ring eyes, warm \
+yellow belly light). Review the two contact sheets in this directory: \
+dense_sheet.png (5 frames per scene, one scene per row, in story order) and \
+boundaries_sheet.png (4 frames straddling each cut between scenes). Hunt \
+specifically for: (1) duplicate characters or extra glows/lights; (2) Niko's \
+tail changing shape, size, or type between frames or scenes; (3) characters \
+merging, fusing, or overlapping into one shape; (4) background elements \
+(flowers, trees, props) vanishing or appearing between frames of one scene; \
+(5) reflections that contradict the character's pose; (6) art-style breaks \
+into 2D/anime; (7) hard world jumps at cuts. Report every finding as: sheet, row \
+number, frame number, defect, severity (critical/minor). End with verdict \
+SHIP or FIX."""
+
+
+def visual_checklist_qa(proj: Path) -> Path | None:
+    """LLM defect-checklist pass over the strip sheets (needs agy)."""
+    review = proj / "review"
+    bounds = sorted((review / "boundaries").glob("boundary_*.png"))
+    dense = sorted((review / "dense").glob("dense_*.png"))
+    if not bounds or not dense:
+        return None
+    _vstack(bounds, review / "boundaries_sheet.png")
+    _vstack(dense, review / "dense_sheet.png")
+    report = proj / "qa_visual_report.md"
+    try:
+        r = subprocess.run(
+            ["agy", "--sandbox", "--dangerously-skip-permissions",
+             "-p", CHECKLIST],
+            capture_output=True, text=True, timeout=2400, cwd=review)
+        report.write_text(r.stdout or r.stderr)
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        report.write_text(f"visual checklist QA unavailable: {e}\n")
+    return report
+
+
 def run_machine_qa(proj: Path, project: str, shots: list) -> Path:
     lines = [f"# Machine QA — {project}", ""]
     audio = proj / "audio"
