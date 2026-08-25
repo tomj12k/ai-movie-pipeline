@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import studio as st
 
 BLENDER = "/Applications/Blender.app/Contents/MacOS/Blender"
-STAGES = ["wireframes", "render", "proxies", "assemble", "qa"]
+STAGES = ["wireframes", "render", "proxies", "assemble", "mix", "qa"]
 
 
 def notify(msg):
@@ -377,7 +377,21 @@ def stage_assemble(proj, shots, rv, a):
     checkpoint(a.auto, f"Draft reel assembled ({len(segs)} shots) — {draft.name}")
 
 
+def stage_mix(proj, shots, rv, a):
+    import mixdown
+    final = mixdown.final_mix(proj, a.project)
+    for still in _stills(final, rv.dir, "final"):
+        rv.add("mix", f"final {still.stem.split('_')[-1]}%", still)
+    rv.show()
+    checkpoint(a.auto, f"Final master mixed — {final.name}")
+
+
 def stage_qa(proj, shots, rv, a):
+    import qa_checks
+    try:
+        qa_checks.run_machine_qa(proj, a.project, shots)
+    except Exception as e:  # machine QA must never block the LLM review
+        print(f"machine QA failed: {e}")
     r = subprocess.run([sys.executable, str(Path(st.__file__)), "qa",
                         "--project", a.project], capture_output=True, text=True)
     print(r.stdout[-1500:])
@@ -412,7 +426,7 @@ def main(argv=None):
         print(f"\n━━ stage: {stage} ━━")
         {"wireframes": stage_wireframes, "render": stage_render,
          "proxies": stage_proxies, "assemble": stage_assemble,
-         "qa": stage_qa}[stage](proj, shots, rv, a)
+         "mix": stage_mix, "qa": stage_qa}[stage](proj, shots, rv, a)
     notify("Pipeline complete")
     print("\n✓ pipeline complete — review sheet:", rv.dir / "index.html")
 
