@@ -35,8 +35,12 @@ def notify(msg):
 def checkpoint(auto, msg):
     notify(msg)
     print(f"\n■ CHECKPOINT — {msg}")
-    if not auto:
+    if auto or not sys.stdin or not sys.stdin.isatty():
+        return   # detached/nohup run: never block on a prompt nobody can answer
+    try:
         input("  review the contact sheet, then press Enter to continue (Ctrl-C aborts)… ")
+    except EOFError:
+        print("  (no interactive input available — continuing)")
 
 
 class Review:
@@ -126,13 +130,29 @@ for name, frame in {frames!r}.items():
     checkpoint(a.auto, "Wireframes rendered — check camera alignment per shot")
 
 
+def clip_duration(p: Path) -> float:
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                        "format=duration", "-of", "csv=p=0", str(p)],
+                       capture_output=True, text=True)
+    try:
+        return float(r.stdout.strip())
+    except ValueError:
+        return 0.0
+
+
 def _stills(mp4: Path, outdir: Path, base: str):
+    """Frames at 25/50/75% of the clip's real duration. (These used to use
+    `select=gte(n,pct)`, which is a FRAME index, so every review sheet only
+    ever showed the first ~3s of a 20s clip and late-clip drift went unseen.)"""
     outs = []
+    dur = clip_duration(mp4)
+    if dur <= 0:
+        return outs
     for pct in (25, 50, 75):
         out = outdir / f"{base}_{pct}.jpg"
-        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(mp4),
-                        "-vf", f"select=gte(n\\,{pct})", "-frames:v", "1", str(out)],
-                       capture_output=True)
+        subprocess.run(["ffmpeg", "-y", "-v", "error",
+                        "-ss", f"{dur * pct / 100.0:.3f}", "-i", str(mp4),
+                        "-frames:v", "1", str(out)], capture_output=True)
         if out.is_file():
             outs.append(out)
     return outs
@@ -166,13 +186,32 @@ def wait_valid_take(renders: Path, sid: str, tries=24, delay=10):
     return None
 
 
+FAILURES = []  # (stage, detail) — main() exits nonzero if any accumulate
+
+
+def _job_alive(pid):
+    """True if ComfyUI still knows this prompt (queued or running)."""
+    try:
+        q = st.http_json(f"{st.COMFY_URL}/queue", timeout=10)
+        for lane in ("queue_running", "queue_pending"):
+            if any(item[1] == pid for item in q.get(lane, [])):
+                return True
+    except Exception:
+        return True   # can't tell — assume alive rather than abort
+    return False
+
+
 def stage_render(proj, shots, rv, a):
     renders = proj / "renders"
     prev_mp4 = None
+    missing = []
     only = set(getattr(a, "shots", "").split(",")) - {""} if getattr(a, "shots", None) else None
     for idx, shot in enumerate(shots):
         sid = shot["id"]
-        skip = (getattr(a, "resume", False) and valid_clip(newest_take(renders, sid))) \
+        # --resume skips already-good shots, but an explicit --shots retake
+        # must always re-render, even when a (bad) take already exists.
+        skip = (only is None and getattr(a, "resume", False)
+                and valid_clip(newest_take(renders, sid))) \
                or (only is not None and sid not in only)
         if skip:
             t = newest_take(renders, sid)
@@ -188,6 +227,7 @@ def stage_render(proj, shots, rv, a):
                 prev_mp4 = wait_valid_take(renders, shots[idx - 1]["id"])
             if not valid_clip(prev_mp4):
                 print(f"  !! {sid}: no complete previous clip to chain from — skipping")
+                missing.append(sid)
                 continue
             img = proj / f"chain_{sid}.png"
             ok = False
@@ -201,6 +241,7 @@ def stage_render(proj, shots, rv, a):
                 time.sleep(15)
             if not ok:
                 print(f"  !! {sid}: chain frame extraction kept failing — skipping")
+                missing.append(sid)
                 continue
         else:
             img = proj / src
@@ -214,31 +255,60 @@ def stage_render(proj, shots, rv, a):
                                  prefix=f"{sid}_take",
                                  krea_denoise=shot.get("krea_denoise"))
         print(f"  {sid}: rendering ({pid})…")
+        lost, t0 = 0, time.time()
         while True:
             time.sleep(10)
             try:
                 hist = st.http_json(f"{st.COMFY_URL}/history/{pid}", timeout=10)
             except Exception:
                 continue
-            if pid in hist:
-                stt = hist[pid].get("status", {})
-                if stt.get("status_str") == "error":
-                    print(f"  !! {sid} failed — continuing with the next shot")
-                    notify(f"{sid} FAILED — see terminal")
+            if pid not in hist:
+                # ComfyUI history is in-memory: a restart mid-job erases the
+                # prompt id and this loop would spin forever without this.
+                lost = lost + 1 if not _job_alive(pid) else 0
+                if lost >= 3:
+                    print(f"  !! {sid}: job {pid} vanished from ComfyUI "
+                          f"(server restarted?) — marking failed")
+                    notify(f"{sid} LOST — ComfyUI dropped the job")
+                    missing.append(sid)
                     break
-                if stt.get("completed"):
-                    for _ in range(18):   # wait for the 1-min NAS sync
-                        mp4 = newest_take(renders, sid)
-                        if mp4 and mp4 != existing and valid_clip(mp4):
-                            prev_mp4 = mp4
-                            for still in _stills(mp4, rv.dir, f"{sid}"):
-                                rv.add("render", f"{sid} {still.stem.split('_')[-1]}%", still)
-                            break
-                        time.sleep(10)
-                    rv.show()
+                if time.time() - t0 > 60 and int(time.time() - t0) % 60 < 10:
+                    print(f"  {sid}: waiting… {int(time.time() - t0)}s")
+                continue
+            stt = hist[pid].get("status", {})
+            if stt.get("status_str") == "error":
+                print(f"  !! {sid} failed — continuing with the next shot")
+                notify(f"{sid} FAILED — see terminal")
+                missing.append(sid)
+                break
+            if stt.get("completed"):
+                got = None
+                for _ in range(18):   # wait for the 1-min NAS sync
+                    mp4 = newest_take(renders, sid)
+                    if mp4 and mp4 != existing and valid_clip(mp4):
+                        got = prev_mp4 = mp4
+                        for still in _stills(mp4, rv.dir, f"{sid}"):
+                            rv.add("render", f"{sid} {still.stem.split('_')[-1]}%", still)
+                        break
+                    time.sleep(10)
+                rv.show()
+                if got:
                     notify(f"{sid} rendered — stills on the review sheet")
-                    break
-    checkpoint(a.auto, "All shots rendered — review before proxies/QA")
+                else:
+                    print(f"  !! {sid}: render completed but no valid clip "
+                          f"appeared after 180s — marking failed")
+                    notify(f"{sid} MISSING — completed but clip never synced")
+                    missing.append(sid)
+                break
+    (proj / "render_manifest.json").write_text(json.dumps(
+        {"rendered": [s["id"] for s in shots if s["id"] not in missing],
+         "missing": missing}, indent=1))
+    if missing:
+        FAILURES.append(("render", f"missing shots: {', '.join(missing)}"))
+        notify(f"render INCOMPLETE — missing {', '.join(missing)}")
+    checkpoint(a.auto, "All shots rendered — review before proxies/QA"
+               if not missing else
+               f"Render incomplete — missing {', '.join(missing)}")
 
 
 def stage_proxies(proj, shots, rv, a):
@@ -260,17 +330,21 @@ def stage_assemble(proj, shots, rv, a):
     Clips map to shots in render order (reel_*_00001 -> first shot, etc.)."""
     raw = Path.home() / "StudioProxies" / a.project / "raw"
     ordered = sorted(raw.glob("reel_*.mp4"))
-    pairs = []
+    pairs, dropped = [], []
     for i, shot in enumerate(shots):
         # Resolution order: explicit "clip" pin > newest <sid>_take_*.mp4 >
         # positional legacy (reel_* numbering).
         if shot.get("clip"):
             clip = raw / shot["clip"]
         else:
-            clip = newest_take(raw, shot["id"]) or \
-                   (ordered[i] if i < len(ordered) else None)
+            clip = newest_take(raw, shot["id"])
+            # Positional fallback only when NO shot resolves by id; mixing the
+            # two modes shifts every later shot onto its neighbour's clip.
+            if clip is None and not any(newest_take(raw, s["id"]) for s in shots):
+                clip = ordered[i] if i < len(ordered) else None
         if clip is None or not clip.is_file():
             print(f"  !! no clip for {shot['id']} — skipping it in the draft")
+            dropped.append(shot["id"])
             continue
         pairs.append((shot, clip))
     # Video: hard cuts on the light events. Audio: every shot generates its own
@@ -367,6 +441,14 @@ def stage_assemble(proj, shots, rv, a):
                     "-i", str(mixed), "-map", "0:v", "-map", "1:a",
                     "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
                     "-shortest", str(draft)], check=True)
+    # Record what actually made the cut: QA derives boundary timestamps from
+    # this, not from shots.json, so skipped shots can't shift every strip.
+    (proj / "cut_manifest.json").write_text(json.dumps(
+        {"shots": [s["id"] for s, _ in pairs], "durs": durs,
+         "xfade": XFV, "dropped": dropped, "total": total}, indent=1))
+    if dropped:
+        FAILURES.append(("assemble", f"dropped shots: {', '.join(dropped)}"))
+        notify(f"assemble INCOMPLETE — dropped {', '.join(dropped)}")
     # Put a copy where `studio qa` looks, so QA reviews the assembled film.
     proxdir = Path.home() / "StudioProxies" / a.project / "proxy"
     proxdir.mkdir(parents=True, exist_ok=True)
@@ -395,16 +477,29 @@ def stage_qa(proj, shots, rv, a):
             print(f"■ visual checklist: {rep}")
     except Exception as e:  # machine QA must never block the LLM review
         print(f"machine QA failed: {e}")
+        FAILURES.append(("qa", f"machine QA failed: {e}"))
+    report = proj / "qa_report.md"
+    before = report.stat().st_mtime if report.is_file() else 0
     r = subprocess.run([sys.executable, str(Path(st.__file__)), "qa",
                         "--project", a.project], capture_output=True, text=True)
     print(r.stdout[-1500:])
+    if r.returncode != 0:
+        print(f"!! studio qa exited {r.returncode}: {r.stderr[-500:]}")
+        FAILURES.append(("qa", f"studio qa exited {r.returncode}"))
+        notify("QA FAILED — no review was produced")
+        return
+    if not report.is_file() or report.stat().st_mtime <= before:
+        print("!! qa_report.md was not refreshed — the report on disk is stale")
+        FAILURES.append(("qa", "qa_report.md not refreshed (stale report)"))
+        notify("QA produced no new report — stale file on disk")
+        return
     verdict = "see qa_report.md"
     for line in (r.stdout or "").splitlines():
         if "SHIP" in line or "FIX" in line:
             verdict = line.strip()[:80]
             break
     notify(f"QA done: {verdict}")
-    print(f"\n■ QA report: {proj / 'qa_report.md'}")
+    print(f"\n■ QA report: {report}")
 
 
 def stage_audit(proj, shots, rv, a):
@@ -459,6 +554,16 @@ def main(argv=None):
          "proxies": stage_proxies, "assemble": stage_assemble,
          "mix": stage_mix, "qa": stage_qa,
          "audit": stage_audit}[stage](proj, shots, rv, a)
+
+    # Reconciliation: a run that lost shots or skipped QA must never read as
+    # a clean finish (an empty cut once shipped because prints got swallowed).
+    if FAILURES:
+        print("\n✗ pipeline finished WITH FAILURES:")
+        for stage_name, detail in FAILURES:
+            print(f"   - {stage_name}: {detail}")
+        notify(f"Pipeline INCOMPLETE — {len(FAILURES)} failure(s)")
+        print("review sheet:", rv.dir / "index.html")
+        sys.exit(1)
     notify("Pipeline complete")
     print("\n✓ pipeline complete — review sheet:", rv.dir / "index.html")
 

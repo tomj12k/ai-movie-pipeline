@@ -91,6 +91,14 @@ def final_mix(proj: Path, project: str) -> Path:
     work = Path.home() / "StudioProxies" / project / "assemble_work"
     work.mkdir(parents=True, exist_ok=True)
 
+    # A missing stem silently produces a foley-only "master" that still gets
+    # archived — say so loudly instead.
+    absent = [n for n, p in (("music", music), ("narration", narr))
+              if not p or not p.exists()]
+    if absent:
+        print(f"!! MIXING WITHOUT {', '.join(absent).upper()} — "
+              f"the master will not contain {' or '.join(absent)}")
+
     card = build_end_card(draft, work, cfg)
     total = _probe_dur(draft) + cfg["card_seconds"]
     fade_at = total - 1.7
@@ -125,8 +133,18 @@ def final_mix(proj: Path, project: str) -> Path:
                     "-c:a", "aac", "-b:a", "192k",
                     "-t", f"{total:.3f}", str(final)], check=True)
 
-    for dest in (Path.home() / "StudioProxies" / project,
-                 Path.home() / "StudioMounts/Portfolio_Archive" / project):
+    local = Path.home() / "StudioProxies" / project
+    local.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(final, local / final.name)
+    # Only archive to a real mount: mkdir on an absent mount would quietly
+    # create a local folder and the "archive" would never reach the NAS.
+    archive_root = Path.home() / "StudioMounts/Portfolio_Archive"
+    if archive_root.is_mount() or archive_root.is_dir() and \
+            any(archive_root.iterdir()):
+        dest = archive_root / project
         dest.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(final, dest / final.name)
+    else:
+        print(f"!! Portfolio_Archive is not mounted — master NOT archived "
+              f"(local copy only: {local / final.name})")
     return final

@@ -210,6 +210,12 @@ def cmd_codegen(a):
         code = code.split("\n", 1)[1] if "\n" in code else ""
     out = proj / "blender_layout.py"
     out.write_text(code)
+    # compile("") succeeds, so an empty/near-empty generation would otherwise
+    # pass validation and hand Blender a script that silently does nothing.
+    if len(code.strip()) < 200 or "bpy" not in code:
+        sys.exit(f"✗ generated layout looks empty or truncated "
+                 f"({len(code.strip())} chars, bpy {'found' if 'bpy' in code else 'MISSING'})"
+                 f"; re-run code-gen")
     try:
         compile(code, str(out), "exec")
     except SyntaxError as e:
@@ -333,13 +339,27 @@ def cmd_render(a):
                           style_prompt=a.style_prompt, motion_prompt=a.motion_prompt,
                           seed=a.seed, prefix=a.prefix)
     print("… rendering on the Spark (Ctrl-C detaches; render continues)")
-    t0 = time.time()
+    t0, lost = time.time(), 0
     while True:
         time.sleep(10)
         try:
             hist = http_json(f"{COMFY_URL}/history/{pid}", timeout=10)
         except Exception:
             continue
+        if pid not in hist:
+            # ComfyUI keeps history in memory; a restart erases the prompt id
+            # and this loop would otherwise poll forever.
+            try:
+                q = http_json(f"{COMFY_URL}/queue", timeout=10)
+                queued = any(i[1] == pid for lane in
+                             ("queue_running", "queue_pending")
+                             for i in q.get(lane, []))
+            except Exception:
+                queued = True
+            lost = 0 if queued else lost + 1
+            if lost >= 3:
+                sys.exit(f"✗ job {pid} vanished from ComfyUI after "
+                         f"{time.time()-t0:.0f}s (server restarted?)")
         if pid in hist:
             st = hist[pid].get("status", {})
             if st.get("status_str") == "error":
