@@ -18,10 +18,20 @@ TTS_PY = Path.home() / ".studio-tts-venv" / "bin" / "python"
 
 
 def _probe_dur(path: Path) -> float:
-    out = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
-                          "format=duration", "-of", "csv=p=0", str(path)],
-                         capture_output=True, text=True).stdout.strip()
-    return float(out)
+    """Raises with a clear message rather than ValueError/hanging: the draft
+    lives on an SMB share, so this is a likely place to stall."""
+    try:
+        out = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                              "format=duration", "-of", "csv=p=0", str(path)],
+                             capture_output=True, text=True,
+                             timeout=60).stdout.strip()
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"ffprobe timed out on {path} — NAS stalled?")
+    try:
+        return float(out)
+    except ValueError:
+        raise RuntimeError(f"cannot read duration of {path} (got {out!r}); "
+                           f"is the draft reel complete?")
 
 
 def _title_overlay(work: Path, title: str, subtitle: str) -> Path | None:
@@ -49,8 +59,13 @@ def build_end_card(draft: Path, work: Path, cfg: dict) -> Path:
     """8s card: slow zoom on the film's last frame, title fading in/out."""
     dur = cfg["card_seconds"]
     last = work / "card_last_frame.png"
-    subprocess.run(["ffmpeg", "-y", "-v", "error", "-sseof", "-0.1",
-                    "-i", str(draft), "-frames:v", "1", str(last)], check=True)
+    r = subprocess.run(["ffmpeg", "-y", "-v", "error", "-sseof", "-0.1",
+                        "-i", str(draft), "-frames:v", "1", str(last)],
+                       capture_output=True, text=True)
+    if r.returncode != 0 or not last.is_file():
+        raise RuntimeError(f"cannot read the last frame of {draft.name} — "
+                           f"the draft reel is missing or truncated "
+                           f"({r.stderr.strip()[-200:]})")
     card = work / "end_card.mp4"
     overlay = _title_overlay(work, cfg["title"], cfg["subtitle"]) \
         if cfg["title"] else None
@@ -138,9 +153,10 @@ def final_mix(proj: Path, project: str) -> Path:
     shutil.copyfile(final, local / final.name)
     # Only archive to a real mount: mkdir on an absent mount would quietly
     # create a local folder and the "archive" would never reach the NAS.
+    # is_mount() alone: a stale local dir left by an older buggy run would
+    # otherwise satisfy a directory check and swallow the master again.
     archive_root = Path.home() / "StudioMounts/Portfolio_Archive"
-    if archive_root.is_mount() or archive_root.is_dir() and \
-            any(archive_root.iterdir()):
+    if archive_root.is_mount():
         dest = archive_root / project
         dest.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(final, dest / final.name)

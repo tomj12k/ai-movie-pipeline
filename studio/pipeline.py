@@ -27,9 +27,18 @@ STAGES = ["wireframes", "render", "proxies", "assemble", "mix", "qa", "audit"]
 
 
 def notify(msg):
-    subprocess.run(["osascript", "-e",
-                    f'display notification "{msg}" with title "Studio Pipeline" sound name "Glass"'],
-                   capture_output=True)
+    """Notification text can come from LLM output (QA verdicts, audit
+    summaries), so it must never be interpolated into the AppleScript source:
+    osascript is an interpreter and a quote plus newline lets `do shell script`
+    run anything. Pass it as a run-handler argument instead."""
+    subprocess.run(
+        ["osascript",
+         "-e", "on run {m}",
+         "-e", 'display notification m with title "Studio Pipeline" '
+               'sound name "Glass"',
+         "-e", "end run",
+         str(msg)],
+        capture_output=True)
 
 
 def checkpoint(auto, msg):
@@ -55,8 +64,14 @@ class Review:
         self.opened = False
 
     def add(self, stage, label, image: Path):
+        # review/ lives on the SMB share; a dropped mount here must not throw
+        # away a render that already succeeded.
         dest = self.dir / f"{stage}_{image.name}"
-        shutil.copyfile(image, dest)
+        try:
+            shutil.copyfile(image, dest)
+        except OSError as e:
+            print(f"  (review sheet unavailable: {e})")
+            return
         self.state.setdefault(stage, [])
         entry = {"label": label, "img": dest.name, "t": time.strftime("%H:%M:%S")}
         self.state[stage] = [e for e in self.state[stage] if e["label"] != label] + [entry]
@@ -131,12 +146,19 @@ for name, frame in {frames!r}.items():
 
 
 def clip_duration(p: Path) -> float:
-    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
-                        "format=duration", "-of", "csv=p=0", str(p)],
-                       capture_output=True, text=True)
+    """0.0 on any failure. ffprobe against a stalled SMB mount blocks in
+    uninterruptible I/O, so this must always carry a timeout."""
+    try:
+        r = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                            "format=duration", "-of", "csv=p=0", str(p)],
+                           capture_output=True, text=True,
+                           timeout=PROBE_TIMEOUT)
+    except (subprocess.TimeoutExpired, OSError):
+        print(f"  !! ffprobe timed out on {p.name} (NAS stalled?)")
+        return 0.0
     try:
         return float(r.stdout.strip())
-    except ValueError:
+    except ValueError:      # empty, or "N/A" for an unmeasurable stream
         return 0.0
 
 
@@ -168,13 +190,7 @@ def valid_clip(p: Path, min_dur=9.0) -> bool:
     container probes complete and near full length."""
     if p is None or not p.is_file():
         return False
-    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
-                        "format=duration", "-of", "csv=p=0", str(p)],
-                       capture_output=True, text=True)
-    try:
-        return float(r.stdout.strip()) >= min_dur
-    except ValueError:
-        return False
+    return clip_duration(p) >= min_dur
 
 
 def wait_valid_take(renders: Path, sid: str, tries=24, delay=10):
@@ -187,6 +203,8 @@ def wait_valid_take(renders: Path, sid: str, tries=24, delay=10):
 
 
 FAILURES = []  # (stage, detail) — main() exits nonzero if any accumulate
+SHOT_TIMEOUT = 1800   # wall-clock cap per shot; a hung GPU job can't stall the night
+PROBE_TIMEOUT = 60    # ffprobe on an SMB share can block uninterruptibly
 
 
 def _job_alive(pid):
@@ -246,22 +264,37 @@ def stage_render(proj, shots, rv, a):
         else:
             img = proj / src
         existing = newest_take(renders, sid)
-        pid = st.submit_workflow(shot.get("workflow", "krea2_niko_ltx_pipeline"),
-                                 a.project,
-                                 image=img,
-                                 style_prompt=shot["style_prompt"],
-                                 motion_prompt=shot["motion_prompt"],
-                                 seed=shot.get("seed"),
-                                 prefix=f"{sid}_take",
-                                 krea_denoise=shot.get("krea_denoise"))
+        # The submit itself was the one unguarded call: a ComfyUI restart at
+        # this instant killed the whole run before any manifest was written.
+        try:
+            pid = st.submit_workflow(shot.get("workflow", "krea2_niko_ltx_pipeline"),
+                                     a.project,
+                                     image=img,
+                                     style_prompt=shot["style_prompt"],
+                                     motion_prompt=shot["motion_prompt"],
+                                     seed=shot.get("seed"),
+                                     prefix=f"{sid}_take",
+                                     krea_denoise=shot.get("krea_denoise"))
+        except Exception as e:
+            print(f"  !! {sid}: submit failed ({e}) — skipping")
+            notify(f"{sid} SUBMIT FAILED")
+            missing.append(sid)
+            continue
         print(f"  {sid}: rendering ({pid})…")
         lost, t0 = 0, time.time()
         while True:
             time.sleep(10)
+            if time.time() - t0 > SHOT_TIMEOUT:
+                print(f"  !! {sid}: exceeded {SHOT_TIMEOUT}s — moving on")
+                notify(f"{sid} TIMED OUT")
+                missing.append(sid)
+                break
             try:
                 hist = st.http_json(f"{st.COMFY_URL}/history/{pid}", timeout=10)
             except Exception:
-                continue
+                # Not `continue`: that would skip the liveness check below and
+                # spin forever through a sustained ComfyUI outage.
+                hist = {}
             if pid not in hist:
                 # ComfyUI history is in-memory: a restart mid-job erases the
                 # prompt id and this loop would spin forever without this.
@@ -312,10 +345,24 @@ def stage_render(proj, shots, rv, a):
 
 
 def stage_proxies(proj, shots, rv, a):
-    r = subprocess.run([sys.executable, str(Path(st.__file__)), "sync-local",
-                        "--project", a.project], text=True)
+    cmd = [sys.executable, str(Path(st.__file__)), "sync-local",
+           "--project", a.project]
+    r = subprocess.run(cmd, text=True)
     if r.returncode != 0:
-        sys.exit("sync-local failed")
+        # openrsync returns 1 for any error, including a transient read on a
+        # file the Spark is still writing — retry once before giving up.
+        print("  sync-local failed; retrying in 30s…")
+        time.sleep(30)
+        r = subprocess.run(cmd, text=True)
+    if r.returncode != 0:
+        raw = Path.home() / "StudioProxies" / a.project / "raw"
+        if any(raw.glob("*.mp4")) if raw.is_dir() else False:
+            print("!! sync-local failed twice, but clips exist locally — "
+                  "continuing with what synced")
+            FAILURES.append(("proxies", "sync-local failed (partial sync)"))
+        else:
+            FAILURES.append(("proxies", "sync-local failed, no local clips"))
+            sys.exit("sync-local failed and no clips are present locally")
     proxdir = Path.home() / "StudioProxies" / a.project / "proxy"
     for p in sorted(proxdir.glob("*.mp4"))[-8:]:
         stills = _stills(p, rv.dir, f"proxy_{p.stem[:20]}")
@@ -355,7 +402,11 @@ def stage_assemble(proj, shots, rv, a):
     work = Path.home() / "StudioProxies" / a.project / "assemble_work"
     work.mkdir(parents=True, exist_ok=True)
     segs, auds, durs = [], [], []
+    kept = []
     for shot, clip in pairs:
+      # One corrupt clip must not throw away a whole night's renders: drop the
+      # shot from the cut and keep assembling.
+      try:
         dur = shot.get("trim_frames", 48) / 24.0
         seg = work / f"seg_{shot['id']}.mp4"
         frames = int(shot.get("trim_frames", 48))
@@ -382,10 +433,7 @@ def stage_assemble(proj, shots, rv, a):
         # frames), which made foley go silent before each cut. Stretch the
         # normalized audio (pitch-preserving) to fill the video duration, then
         # pad against the silence bed as a safety net.
-        adur = float(subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-             "-of", "csv=p=0", str(aud_ln)],
-            capture_output=True, text=True).stdout.strip() or dur)
+        adur = clip_duration(aud_ln) or dur
         tempo = max(0.5, min(2.0, adur / dur))
         stretch = f"[0:a]atempo={tempo:.6f}[a0];" if adur < dur * 0.995 else "[0:a]anull[a0];"
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(aud_ln),
@@ -395,6 +443,16 @@ def stage_assemble(proj, shots, rv, a):
                         f"[1:a]atrim=0:{dur:.4f}[s];[a0][s]amix=inputs=2:duration=longest:normalize=0[out]",
                         "-map", "[out]", "-t", f"{dur:.4f}", str(aud)], check=True)
         segs.append(seg); auds.append(aud); durs.append(dur)
+        kept.append(shot["id"])
+      except subprocess.CalledProcessError as e:
+        print(f"  !! {shot['id']}: segment build failed ({e}) — dropping it")
+        dropped.append(shot["id"])
+
+    if not segs:
+        FAILURES.append(("assemble", "no usable segments — draft not built"))
+        notify("Assemble FAILED — no usable clips")
+        print("!! no usable segments; skipping draft build")
+        return
 
     # Video: 0.2s crossfade at every boundary. Chained shots start where the
     # previous frame ended, so the dissolve reads as continuous motion.
@@ -444,8 +502,8 @@ def stage_assemble(proj, shots, rv, a):
     # Record what actually made the cut: QA derives boundary timestamps from
     # this, not from shots.json, so skipped shots can't shift every strip.
     (proj / "cut_manifest.json").write_text(json.dumps(
-        {"shots": [s["id"] for s, _ in pairs], "durs": durs,
-         "xfade": XFV, "dropped": dropped, "total": total}, indent=1))
+        {"shots": kept, "durs": durs, "xfade": XFV,
+         "dropped": dropped, "total": total}, indent=1))
     if dropped:
         FAILURES.append(("assemble", f"dropped shots: {', '.join(dropped)}"))
         notify(f"assemble INCOMPLETE — dropped {', '.join(dropped)}")
@@ -542,6 +600,7 @@ def main(argv=None):
                    help="let the audit stage auto-retake flagged shots and "
                         "re-QA (max 2 cycles)")
     a = p.parse_args(argv)
+    a.project = st.safe_project(a.project)
 
     proj = st.projects_root() / a.project
     shots = load_shots(proj)

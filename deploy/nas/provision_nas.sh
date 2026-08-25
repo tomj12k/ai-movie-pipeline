@@ -23,19 +23,34 @@ source "$REPO_ROOT/.env"
 SPARK_IP2="${SPARK_IP2:-}"
 
 BASE="https://${NAS_HOST}:${NAS_DSM_PORT}/webapi/entry.cgi"
-# -k: DSM serves a self-signed certificate on the LAN. To pin it instead,
-# export NAS_CA=/path/to/dsm-cert.pem and the scripts verify against it.
-if [[ -n "${NAS_CA:-}" ]]; then CURL=(curl -s --cacert "$NAS_CA"); else CURL=(curl -sk); fi
+# DSM serves a self-signed certificate on the LAN, so verification needs a
+# pinned CA: export NAS_CA=/path/to/dsm-cert.pem. Skipping verification while
+# POSTing the DSM admin password lets anyone who can ARP-spoof the LAN capture
+# it, so that path is now opt-in and noisy rather than the default.
+if [[ -n "${NAS_CA:-}" ]]; then
+  CURL=(curl -s --cacert "$NAS_CA")
+elif [[ "${NAS_INSECURE_TLS:-0}" == "1" ]]; then
+  echo "WARNING: NAS_INSECURE_TLS=1 — sending the DSM password over an" >&2
+  echo "         unverified TLS connection. Set NAS_CA to pin the cert." >&2
+  CURL=(curl -sk)
+else
+  echo "ERROR: set NAS_CA=/path/to/dsm-cert.pem to verify the DSM certificate." >&2
+  echo "       Export the cert from DSM > Control Panel > Security > Certificate." >&2
+  echo "       To proceed unverified anyway (LAN only): NAS_INSECURE_TLS=1" >&2
+  exit 1
+fi
 
 # Login POSTs the credentials via stdin (curl -d @-) so the password never
 # appears in a URL, process argv, or the DSM access log query string.
 api_login() {
   local resp body
-  body=$(python3 - <<EOF
+  # Quoted heredoc + os.environ: interpolating the credentials into Python
+  # source breaks on any password containing a quote (and is injectable).
+  body=$(NAS_USER="$NAS_USER" NAS_PASS="$NAS_PASS" python3 - <<'EOF'
 from urllib.parse import urlencode
 import os
 print(urlencode({"api":"SYNO.API.Auth","version":"7","method":"login",
-                 "account":"${NAS_USER}","passwd":"""${NAS_PASS}""",
+                 "account":os.environ["NAS_USER"],"passwd":os.environ["NAS_PASS"],
                  "session":"StudioProv","format":"sid","enable_syno_token":"yes"}))
 EOF
 )

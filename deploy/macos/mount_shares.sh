@@ -25,8 +25,20 @@ mount_share() {
   fi
   local mp="$HOME/StudioMounts/${share}"
   mkdir -p "$mp"
+  # The password must NOT appear in argv: macOS lets any local user read
+  # another user's full command line via ps. mount_smbfs reads it from an
+  # nsmb.conf-style file instead (mode 600, removed immediately after).
+  local cred
+  cred="$(mktemp "${TMPDIR:-/tmp}/.nsmb.XXXXXX")"
+  chmod 600 "$cred"
+  printf '[%s:%s]\npassword=%s\n' \
+    "$(echo "$NAS_SMB_HOST" | tr '[:lower:]' '[:upper:]')" \
+    "$(echo "$NAS_USER" | tr '[:lower:]' '[:upper:]')" \
+    "$NAS_PASS" > "$cred"
   # -o soft: fail fast if the NAS is down instead of wedging Finder/Resolve.
-  mount_smbfs -o soft "//${NAS_USER}:${NAS_PASS}@${NAS_SMB_HOST}/${share}" "$mp"
+  SMB_CONF_FILE="$cred" mount_smbfs -o soft \
+    "//${NAS_USER}@${NAS_SMB_HOST}/${share}" "$mp"
+  rm -f "$cred"
   echo "mounted: $mp"
 }
 

@@ -62,6 +62,17 @@ VLLM_URL = CFG.get("VLLM_URL", f"http://{SPARK}:8000/v1")
 COMFY_URL = CFG.get("COMFYUI_URL", f"http://{SPARK}:8188")
 
 
+def safe_project(name: str) -> str:
+    """A project name is only ever a single directory under the share. An
+    absolute path would REPLACE the share root in a Path join, and '..' walks
+    out of it, so anything but a plain name is rejected at the entry point."""
+    if not name or name != Path(name).name or name in (".", "..") \
+            or name.startswith("."):
+        raise SystemExit(f"✗ invalid --project {name!r}: use a plain folder "
+                         f"name (no slashes, no '..', no leading dot)")
+    return name
+
+
 def projects_root() -> Path:
     """The Active_Projects share as mounted on THIS machine."""
     sysname = platform.system().lower()
@@ -518,6 +529,8 @@ def main():
     s.set_defaults(fn=None)  # handled by the early intercept in main()
 
     a = p.parse_args()
+    if getattr(a, "project", None):
+        a.project = safe_project(a.project)
     try:
         a.fn(a)
     except KeyboardInterrupt:

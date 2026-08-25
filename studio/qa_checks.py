@@ -183,8 +183,15 @@ def audit_verdict(proj: Path) -> dict:
             capture_output=True, text=True, timeout=1200, cwd=proj)
         m = re.search(r"\{.*\}", r.stdout, re.DOTALL)
         v = json.loads(m.group(0)) if m else fallback
+        # Validate every key the callers index, not just verdict: a
+        # well-formed reply missing retake_shots used to KeyError the run.
         if v.get("verdict") not in ("SHIP", "FIX"):
             v = fallback
+        else:
+            v = {"verdict": v["verdict"],
+                 "retake_shots": list(v.get("retake_shots") or []),
+                 "audio_issues": list(v.get("audio_issues") or []),
+                 "summary": str(v.get("summary") or "(no summary)")}
     except Exception as e:
         v = dict(fallback, summary=f"audit failed: {e}")
     (proj / "audit_findings.json").write_text(json.dumps(v, indent=1))

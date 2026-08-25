@@ -25,6 +25,15 @@ CACHE = Path.home() / ".studio-tts-venv" / "models"
 SR = 24000  # kokoro native
 
 
+def safe_project(name: str) -> str:
+    """Reject anything but a plain folder name: an absolute path would replace
+    the share root in the join below, and '..' would walk out of it."""
+    if not name or name != Path(name).name or name in (".", "..") \
+            or name.startswith("."):
+        raise SystemExit(f"✗ invalid --project {name!r}: use a plain folder name")
+    return name
+
+
 def projects_root() -> Path:
     for p in (Path("/Volumes/Active_Projects"),
               Path.home() / "StudioMounts/Active_Projects",
@@ -42,7 +51,7 @@ def main():
     ap.add_argument("--length", type=float, default=300.0)
     a = ap.parse_args()
 
-    proj = projects_root() / a.project
+    proj = projects_root() / safe_project(a.project)
     cues = json.loads((proj / "narration.json").read_text())
     outdir = proj / "audio"
     outdir.mkdir(exist_ok=True)

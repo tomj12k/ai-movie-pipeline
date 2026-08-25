@@ -38,7 +38,7 @@ sudo install -m 0644 "$HERE"/systemd/*.service "$HERE"/systemd/*.timer /etc/syst
 sudo systemctl daemon-reload
 
 # Scoped passwordless restarts so `studio clear` works unattended over SSH.
-sudo bash -c 'printf "pizzacat ALL=(root) NOPASSWD: /usr/bin/systemctl restart comfyui, /usr/bin/systemctl restart vllm-qwen38\n" > /etc/sudoers.d/90-studio-restart \
+sudo bash -c 'printf "%s ALL=(root) NOPASSWD: /usr/bin/systemctl restart comfyui, /usr/bin/systemctl restart vllm-qwen38\n" "${SUDO_USER:-$USER}" > /etc/sudoers.d/90-studio-restart \
   && chmod 440 /etc/sudoers.d/90-studio-restart \
   && visudo -c -f /etc/sudoers.d/90-studio-restart'
 
