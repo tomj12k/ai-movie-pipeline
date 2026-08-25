@@ -258,6 +258,7 @@ def stage_render(proj, shots, rv, a):
     prev_mp4 = None
     missing = []
     gate_notes = {}
+    anchors = {}
     only = set(getattr(a, "shots", "").split(",")) - {""} if getattr(a, "shots", None) else None
     for idx, shot in enumerate(shots):
         sid = shot["id"]
@@ -299,13 +300,27 @@ def stage_render(proj, shots, rv, a):
         else:
             img = proj / src
         existing = newest_take(renders, sid)
-        # The submit itself was the one unguarded call: a ComfyUI restart at
-        # this instant killed the whole run before any manifest was written.
+        # Anchor the shot to the frame it actually inherits. A prompt that
+        # describes a different scale or pose than the incoming frame makes the
+        # model keep the inherited bodies AND paint new correct ones — the
+        # duplicate-character bug, which caused 3 of the 4 duplicates in this
+        # production. Deriving the opening framing from the real frame removes
+        # the conflict instead of relying on the prompt being hand-matched.
+        style_prompt = shot["style_prompt"]
+        if src == "chain" and getattr(a, "anchor", False):
+            import qa_checks
+            framing = shot.get("opening_framing") or qa_checks.describe_framing(img)
+            if framing:
+                style_prompt = f"Opening framing: {framing} {style_prompt}"
+                print(f"  {sid}: anchored — {framing[:90]}")
+                anchors[sid] = framing
+            else:
+                print(f"  {sid}: framing description unavailable, prompt unchanged")
         try:
             pid = st.submit_workflow(shot.get("workflow", "krea2_niko_ltx_pipeline"),
                                      a.project,
                                      image=img,
-                                     style_prompt=shot["style_prompt"],
+                                     style_prompt=style_prompt,
                                      motion_prompt=shot["motion_prompt"],
                                      seed=shot.get("seed"),
                                      prefix=f"{sid}_take",
@@ -390,7 +405,7 @@ def stage_render(proj, shots, rv, a):
                 break
     write_json(proj / "render_manifest.json",
                {"rendered": [s["id"] for s in shots if s["id"] not in missing],
-                "missing": missing, "gate": gate_notes})
+                "missing": missing, "gate": gate_notes, "anchors": anchors})
     if missing:
         FAILURES.append(("render", f"missing shots: {', '.join(missing)}"))
         notify(f"render INCOMPLETE — missing {', '.join(missing)}")
@@ -651,6 +666,10 @@ def main(argv=None):
     p.add_argument("--resume", action="store_true",
                    help="skip shots that already have a complete take")
     p.add_argument("--shots", help="retake only these shot ids, e.g. s07,s08,s09")
+    p.add_argument("--anchor", action="store_true",
+                   help="describe each chain frame's framing and prepend it to "
+                        "that shot's prompt, so a shot cannot open at a "
+                        "different scale or pose than the frame it inherits")
     p.add_argument("--gate", action="store_true",
                    help="check each shot's cast count and character design as "
                         "it renders, before it seeds the next shot in the chain")

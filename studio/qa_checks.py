@@ -236,6 +236,45 @@ def audit_verdict(proj: Path) -> dict:
     return v
 
 
+FRAMING_PROMPT = """Open the image at the exact absolute path {img} — open that \
+path directly, do NOT search the filesystem for it. It is the final frame of a \
+shot in an animated film, and the next shot continues from it.
+
+Describe ONLY the camera framing, in one sentence of at most 25 words, so the \
+next shot can open the same way. Cover: how large the characters appear (tiny \
+and distant, small in frame, mid-shot, close-up, or extreme close-up), where \
+they sit in the frame (left, centre, right), which way they face (toward camera, \
+away from camera, in profile), and their body pose (standing, walking, sitting, \
+lying). Write it as a plain descriptive phrase with no preamble, for example: \
+"Two tiny distant figures seen from behind, standing together on a hill crest, \
+small in the lower centre of frame."
+
+Output the sentence and nothing else."""
+
+
+def describe_framing(img: Path, timeout=300) -> str:
+    """One-line description of a chain frame's composition.
+
+    A shot whose prompt describes a different scale or pose than the frame it
+    inherits makes the model keep the inherited bodies AND paint new correct
+    ones — the duplicate-character bug. Feeding the real framing back into the
+    prompt removes the conflict at its source.
+    """
+    try:
+        r = subprocess.run(
+            ["agy", "--sandbox", "--dangerously-skip-permissions",
+             "-p", FRAMING_PROMPT.format(img=img.resolve())],
+            capture_output=True, text=True, timeout=timeout, cwd=img.parent)
+        if r.returncode != 0 or not r.stdout.strip():
+            return ""
+        line = " ".join(r.stdout.strip().split())
+        line = re.sub(r'^["\'`]|["\'`]$', "", line).strip()
+        # keep it short; a long ramble would crowd out the character block
+        return line[:220] if 10 < len(line) < 400 else ""
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return ""
+
+
 SHOT_GATE_PROMPT = """Open the image at the exact absolute path {sheet} — open \
 that path directly, do NOT search the filesystem for it. It shows {n} frames \
 sampled across one shot of an animated film, left to right in time. {cast}
