@@ -8,12 +8,16 @@ The music bed is sidechain-ducked under the narration so the storyteller
 always sits on top of the score.
 """
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
 
 DEFAULTS = {"foley": 0.75, "music": 0.30, "narration": 1.25,
-            "card_seconds": 8.0, "title": None, "subtitle": "The End"}
+            "card_seconds": 8.0, "title": None, "subtitle": "The End",
+            # Lowering stem levels to rebalance also lowers the whole film, so
+            # the master is re-targeted afterwards. -16 LUFS suits streaming.
+            "target_lufs": -16.0}
 TTS_PY = Path.home() / ".studio-tts-venv" / "bin" / "python"
 
 
@@ -59,10 +63,19 @@ def build_end_card(draft: Path, work: Path, cfg: dict) -> Path:
     """8s card: slow zoom on the film's last frame, title fading in/out."""
     dur = cfg["card_seconds"]
     last = work / "card_last_frame.png"
-    r = subprocess.run(["ffmpeg", "-y", "-v", "error", "-sseof", "-0.1",
-                        "-i", str(draft), "-frames:v", "1", str(last)],
-                       capture_output=True, text=True)
-    if r.returncode != 0 or not last.is_file():
+    # Absolute seek, not -sseof: after an xfade chain the end-relative seek
+    # can land past the final frame and silently encode nothing.
+    draft_dur = _probe_dur(draft)
+    r = None
+    for back in (0.3, 0.6, 1.0):
+        last.unlink(missing_ok=True)
+        r = subprocess.run(["ffmpeg", "-y", "-v", "error",
+                            "-ss", f"{max(0.0, draft_dur - back):.3f}",
+                            "-i", str(draft), "-frames:v", "1", str(last)],
+                           capture_output=True, text=True)
+        if r.returncode == 0 and last.is_file():
+            break
+    if r is None or r.returncode != 0 or not last.is_file():
         raise RuntimeError(f"cannot read the last frame of {draft.name} — "
                            f"the draft reel is missing or truncated "
                            f"({r.stderr.strip()[-200:]})")
@@ -89,6 +102,44 @@ def build_end_card(draft: Path, work: Path, cfg: dict) -> Path:
                str(card)]
     subprocess.run(cmd, check=True)
     return card
+
+
+def measure_lufs(path: Path):
+    """Integrated loudness, or None if it can't be measured."""
+    try:
+        out = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(path),
+                              "-af", "ebur128=framelog=quiet", "-f", "null", "-"],
+                             capture_output=True, text=True, timeout=900).stderr
+    except subprocess.TimeoutExpired:
+        return None
+    m = re.search(r"I:\s+(-?\d+\.\d+)\s+LUFS", out[out.rfind("Summary"):])
+    return float(m.group(1)) if m else None
+
+
+def _retarget_loudness(final: Path, work: Path, target):
+    """Apply a measured gain so the rebalanced mix keeps broadcast level.
+    Plain gain + limiter, not loudnorm: loudnorm truncates the stream EOF in
+    this ffmpeg build and would clip the tail off the master."""
+    if not target:
+        return final
+    cur = measure_lufs(final)
+    if cur is None:
+        print("!! could not measure loudness — master left at mix level")
+        return final
+    gain = target - cur
+    if abs(gain) < 0.5:
+        print(f"  loudness {cur:.1f} LUFS already on target")
+        return final
+    tmp = work / f"leveled_{final.name}"
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(final),
+                    "-af", f"volume={gain:.2f}dB,alimiter=limit=0.95",
+                    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", str(tmp)],
+                   check=True)
+    shutil.move(str(tmp), str(final))
+    after = measure_lufs(final)
+    print(f"  loudness {cur:.1f} -> {after:.1f} LUFS (target {target}, "
+          f"{gain:+.1f} dB)")
+    return final
 
 
 def final_mix(proj: Path, project: str) -> Path:
@@ -118,19 +169,23 @@ def final_mix(proj: Path, project: str) -> Path:
     total = _probe_dur(draft) + cfg["card_seconds"]
     fade_at = total - 1.7
 
+    # Stems differ in rate/layout (Kokoro narration is 24k mono, score is 48k
+    # stereo) and sidechaincompress needs both of its inputs to match, so every
+    # stem is conformed explicitly rather than relying on auto-negotiation.
+    FMT = "aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo"
     inputs = ["-i", str(draft), "-i", str(card)]
     fc = ["[0:v][1:v]concat=n=2:v=1:a=0[v]",
-          f"[0:a]volume={cfg['foley']},apad[fol]"]
+          f"[0:a]volume={cfg['foley']},{FMT},apad[fol]"]
     mix_in, n = ["[fol]"], 2
     if narr.exists():
         inputs += ["-i", str(narr)]
-        fc.append(f"[{n}:a]volume={cfg['narration']},apad,asplit=2[n1][n2]")
+        fc.append(f"[{n}:a]volume={cfg['narration']},{FMT},apad,asplit=2[n1][n2]")
         n += 1
     if music:
         inputs += ["-i", str(music)]
         duck = ("[n2]sidechaincompress=threshold=0.02:ratio=6:attack=100"
                 ":release=800[mus]" if narr.exists() else "anull[mus]")
-        fc.append(f"[{n}:a]volume={cfg['music']},apad[m0]")
+        fc.append(f"[{n}:a]volume={cfg['music']},{FMT},apad[m0]")
         fc.append(f"[m0]{duck}")
         mix_in.append("[mus]")
         n += 1
@@ -147,6 +202,8 @@ def final_mix(proj: Path, project: str) -> Path:
                     "-c:v", "libx264", "-preset", "fast", "-crf", "18",
                     "-c:a", "aac", "-b:a", "192k",
                     "-t", f"{total:.3f}", str(final)], check=True)
+
+    final = _retarget_loudness(final, work, cfg.get("target_lufs"))
 
     local = Path.home() / "StudioProxies" / project
     local.mkdir(parents=True, exist_ok=True)
