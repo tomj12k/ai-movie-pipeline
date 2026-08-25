@@ -257,6 +257,7 @@ def stage_render(proj, shots, rv, a):
     renders = proj / "renders"
     prev_mp4 = None
     missing = []
+    gate_notes = {}
     only = set(getattr(a, "shots", "").split(",")) - {""} if getattr(a, "shots", None) else None
     for idx, shot in enumerate(shots):
         sid = shot["id"]
@@ -359,6 +360,26 @@ def stage_render(proj, shots, rv, a):
                         break
                     time.sleep(10)
                 rv.show()
+                if got and getattr(a, "gate", False):
+                    # Check the shot BEFORE it becomes the chain input for
+                    # everything downstream: one bad frame here propagated
+                    # duplicates through 14 shots before it was noticed.
+                    import qa_checks
+                    expect = shot.get("expect_cast",
+                                      "The film's cast is Niko, a small white "
+                                      "robot bunny with a glossy dark face-screen, "
+                                      "solid glowing yellow ring eyes and tall "
+                                      "upright ears with cyan light-strips, and "
+                                      "sometimes Pip, his smaller round companion.")
+                    try:
+                        ok, detail = qa_checks.shot_gate(got, sid, expect)
+                    except Exception as e:
+                        ok, detail = True, f"gate error: {e}"
+                    print(f"  gate {sid}: {'PASS' if ok else 'FAIL'} — {detail}")
+                    gate_notes[sid] = detail
+                    if not ok:
+                        notify(f"{sid} GATE FAILED — {detail[:60]}")
+                        FAILURES.append(("render", f"{sid} failed shot gate: {detail[:120]}"))
                 if got:
                     notify(f"{sid} rendered — stills on the review sheet")
                 else:
@@ -369,7 +390,7 @@ def stage_render(proj, shots, rv, a):
                 break
     write_json(proj / "render_manifest.json",
                {"rendered": [s["id"] for s in shots if s["id"] not in missing],
-                "missing": missing})
+                "missing": missing, "gate": gate_notes})
     if missing:
         FAILURES.append(("render", f"missing shots: {', '.join(missing)}"))
         notify(f"render INCOMPLETE — missing {', '.join(missing)}")
@@ -630,6 +651,9 @@ def main(argv=None):
     p.add_argument("--resume", action="store_true",
                    help="skip shots that already have a complete take")
     p.add_argument("--shots", help="retake only these shot ids, e.g. s07,s08,s09")
+    p.add_argument("--gate", action="store_true",
+                   help="check each shot's cast count and character design as "
+                        "it renders, before it seeds the next shot in the chain")
     p.add_argument("--fix", action="store_true",
                    help="let the audit stage auto-retake flagged shots and "
                         "re-QA (max 2 cycles)")

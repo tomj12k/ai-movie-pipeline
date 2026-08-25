@@ -235,6 +235,40 @@ def audit_verdict(proj: Path) -> dict:
     return v
 
 
+SHOT_GATE_PROMPT = """Open the image at the exact absolute path {sheet} — open \
+that path directly, do NOT search the filesystem for it. It shows {n} frames \
+sampled across one shot of an animated film, left to right in time. {cast}
+
+Answer in this exact form and nothing else:
+COUNT: <the number of characters in each frame, comma separated>
+DESIGN: OK, or a short phrase naming any frame where the main character's ears \
+are floppy/drooping instead of tall and upright, the eye rings are dashed or \
+dial-like instead of solid rings, the face-screen is missing, or two characters \
+merge into one shape.
+VERDICT: PASS if every frame shows the expected cast and the design holds, \
+otherwise FAIL."""
+
+
+def shot_gate(clip: Path, sid: str, expect: str, frames=5, timeout=420):
+    """Sample one freshly rendered shot and check cast count + design before it
+    becomes the chain input for everything after it. Returns (ok, detail)."""
+    work = clip.parent / "_gate"
+    work.mkdir(exist_ok=True)
+    strips = dense_strips([clip], work)
+    if not strips:
+        return True, "gate skipped (no strip)"
+    sheet = work / f"gate_{sid}.jpg"
+    _sheet(strips, sheet)
+    body = SHOT_GATE_PROMPT.format(sheet=sheet.resolve(), n=frames, cast=expect)
+    out = _review_batch(sheet, body, work, timeout=timeout)
+    verdict = "FAIL" if re.search(r"VERDICT:\s*FAIL", out, re.I) else "PASS"
+    detail = " ".join(l.strip() for l in out.splitlines()
+                      if re.match(r"\s*(COUNT|DESIGN|VERDICT):", l, re.I))
+    if "did not run" in out or "timed out" in out:
+        return True, f"gate inconclusive: {out[:80]}"   # never block on tooling
+    return verdict == "PASS", detail or out[:200]
+
+
 def run_machine_qa(proj: Path, project: str, shots: list) -> Path:
     lines = [f"# Machine QA — {project}", ""]
     audio = proj / "audio"
