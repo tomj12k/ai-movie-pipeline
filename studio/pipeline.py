@@ -298,7 +298,7 @@ def stage_assemble(proj, shots, rv, a):
               ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
         subprocess.run(["ffmpeg", "-y", "-v", "error"] + src +
                        ["-t", f"{dur:.4f}",
-                        "-af", f"loudnorm=I=-18:TP=-1.5:LRA=9,apad=whole_dur={dur:.4f}",
+                        "-af", "loudnorm=I=-18:TP=-1.5:LRA=9,apad",
                         "-ar", "48000", "-ac", "2", str(aud)], check=True)
         segs.append(seg); auds.append(aud); durs.append(dur)
 
