@@ -324,6 +324,24 @@ def stage_assemble(proj, shots, rv, a):
         subprocess.run(cmd, check=True)
         total = sum(durs) - XFV * (len(segs) - 1)
 
+    # Audio: matching acrossfade chain so both timelines stay locked.
+    mixed = work / "audio_mix.wav"
+    if len(auds) == 1:
+        shutil.copyfile(auds[0], mixed)
+    else:
+        afc, acur = [], "[0:a]"
+        for i in range(1, len(auds)):
+            aout = f"[x{i}]"
+            afc.append(f"{acur}[{i}:a]acrossfade=d={XFV}:c1=tri:c2=tri{aout}")
+            acur = aout
+        afc.append(f"{acur}afade=t=in:d=0.2,afade=t=out:st={total - 0.4:.3f}:d=0.4[aout]")
+        acmd = ["ffmpeg", "-y", "-v", "error"]
+        for af in auds:
+            acmd += ["-i", str(af)]
+        acmd += ["-filter_complex", ";".join(afc), "-map", "[aout]",
+                 "-t", f"{total:.4f}", str(mixed)]
+        subprocess.run(acmd, check=True)
+
     draft = proj / "draft_reel.mp4"
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(vid_only),
                     "-i", str(mixed), "-map", "0:v", "-map", "1:a",
