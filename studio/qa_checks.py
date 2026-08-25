@@ -393,15 +393,24 @@ def run_machine_qa(proj: Path, project: str, shots: list) -> Path:
                          "from shots.json and may not match the draft")
         n = len(boundary_strips(draft, durs, review / "boundaries", xf))
         lines.append(f"- {n} boundary strips → review/boundaries/")
-    # Dense strips come from the per-shot clips the draft was built from.
+    # Dense strips MUST come from the clips the draft was actually built from.
+    # The edit/ folder is a rename of an EARLIER assembly and goes stale the
+    # moment anything is re-rendered — reviewing it reports defects that no
+    # longer exist and misses the ones that do.
     raw = Path.home() / "StudioProxies" / project / "raw"
-    edit = Path.home() / "StudioProxies" / project / "edit"
-    clips = sorted(edit.glob("[0-9]*.mp4")) if edit.is_dir() else []
-    if not clips and raw.is_dir():
+    clips = []
+    if raw.is_dir():
         ids = json.loads(cut.read_text())["shots"] if cut.exists() \
             else [s["id"] for s in shots]
-        clips = [c for c in (max(raw.glob(f"{i}_take_*.mp4"), default=None)
+        clips = [c for c in (max(raw.glob(f"{i}_take_[0-9]*.mp4"),
+                                 default=None, key=lambda p: p.name)
                              for i in ids) if c]
+    if not clips:
+        edit = Path.home() / "StudioProxies" / project / "edit"
+        clips = sorted(edit.glob("[0-9]*.mp4")) if edit.is_dir() else []
+        if clips:
+            lines.append("- ⚠ using edit/ clips; they may predate the current "
+                         "render — verify before trusting these findings")
     if clips:
         n = len(dense_strips(clips, review / "dense"))
         lines.append(f"- {n} dense strips → review/dense/")
