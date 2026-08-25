@@ -124,7 +124,8 @@ UPRIGHT ears with cyan light-strips, cyan chest ring, one small round white \
 puff tail), and Pip, his smaller companion (dark face panel, twin yellow ring \
 eyes, warm yellow belly light). Any third character is a defect."""
 
-DENSE_PROMPT = CAST + """ Open the image {sheet} in this directory. Each row is \
+DENSE_PROMPT = CAST + """ Open the image at the exact absolute path {sheet} — \
+open that path directly, do NOT search the filesystem for it. Each row is \
 one scene ({rows}), sampled left to right across time. For EVERY row, first \
 COUNT the characters visible in each frame and say the count. Then flag: (1) \
 any frame containing three or more characters, or a clone/duplicate/ghost; (2) \
@@ -136,7 +137,8 @@ out between frames of the same row; (7) any break into flat 2D or anime style. \
 Report each finding as: row, frame number, defect, severity \
 (critical/minor). If a row is clean, say "row N: clean (N characters)"."""
 
-BOUND_PROMPT = CAST + """ Open the image {sheet} in this directory. Each row \
+BOUND_PROMPT = CAST + """ Open the image at the exact absolute path {sheet} — \
+open that path directly, do NOT search the filesystem for it. Each row \
 shows 4 frames straddling one cut between scenes ({rows}): the first two are \
 before the cut, the last two after. A brief 0.2s dissolve is intentional. For \
 each row, judge whether the two scenes flow as one continuous world. Flag only: \
@@ -186,7 +188,9 @@ def visual_checklist_qa(proj: Path, batch=5) -> Path | None:
             sheet = review / f"qa_{kind}_{i // batch + 1}.jpg"
             _sheet(chunk, sheet)
             names = ", ".join(s.stem.replace(f"{kind}_", "") for s in chunk)
-            body = prompt.format(sheet=sheet.name, rows=names)
+            # Absolute path: given a bare filename agy hunts the whole
+            # filesystem and times out before it ever looks at the image.
+            body = prompt.format(sheet=sheet.resolve(), rows=names)
             out += [f"## {kind} batch {i // batch + 1} ({names})",
                     _review_batch(sheet, body, review), ""]
             print(f"  reviewed {kind} batch {i // batch + 1}")
