@@ -118,46 +118,79 @@ def _vstack(strips: list, out: Path):
     subprocess.run(cmd, check=True)
 
 
-CHECKLIST = """You are a continuity supervisor for a 3D animated film about \
-Niko (small white robot bunny: dark face-screen with yellow ring eyes, cyan \
-ear light-strips, cyan chest ring, ONE small round white puff tail) and Pip \
-(palm-sized white sphere drone: two ear-fins, twin yellow ring eyes, warm \
-yellow belly light). Review the two contact sheets in this directory: \
-dense_sheet.png (5 frames per scene, one scene per row, in story order) and \
-boundaries_sheet.png (4 frames straddling each cut between scenes). Hunt \
-specifically for: (1) duplicate characters or extra glows/lights; (2) Niko's \
-tail changing shape, size, or type between frames or scenes; (3) characters \
-merging, fusing, or overlapping into one shape; (4) background elements \
-(flowers, trees, props) vanishing or appearing between frames of one scene; \
-(5) reflections that contradict the character's pose; (6) art-style breaks \
-into 2D/anime; (7) hard world jumps at cuts. Report every finding as: sheet, row \
-number, frame number, defect, severity (critical/minor). End with verdict \
-SHIP or FIX."""
+CAST = """The film has EXACTLY TWO characters: Niko, the larger white robot \
+bunny (glossy dark face-screen, two big solid glowing yellow ring eyes, TALL \
+UPRIGHT ears with cyan light-strips, cyan chest ring, one small round white \
+puff tail), and Pip, his smaller companion (dark face panel, twin yellow ring \
+eyes, warm yellow belly light). Any third character is a defect."""
+
+DENSE_PROMPT = CAST + """ Open the image {sheet} in this directory. Each row is \
+one scene ({rows}), sampled left to right across time. For EVERY row, first \
+COUNT the characters visible in each frame and say the count. Then flag: (1) \
+any frame containing three or more characters, or a clone/duplicate/ghost; (2) \
+Niko's ears going floppy, drooping, or rounded like a puppy's instead of tall \
+and upright; (3) eye rings becoming dashed, segmented, or dial-like instead of \
+solid rings; (4) the tail changing shape or size; (5) two characters merging, \
+fusing or overlapping into one shape; (6) background elements popping in or \
+out between frames of the same row; (7) any break into flat 2D or anime style. \
+Report each finding as: row, frame number, defect, severity \
+(critical/minor). If a row is clean, say "row N: clean (N characters)"."""
+
+BOUND_PROMPT = CAST + """ Open the image {sheet} in this directory. Each row \
+shows 4 frames straddling one cut between scenes ({rows}): the first two are \
+before the cut, the last two after. A brief 0.2s dissolve is intentional. For \
+each row, judge whether the two scenes flow as one continuous world. Flag only: \
+a hard jump to an unrelated place, a lighting or time-of-day reversal, a \
+character changing design across the cut, or a character count changing across \
+the cut. Report as: row, defect, severity (critical/minor). If a row reads as \
+continuous, say "row N: continuous"."""
 
 
-def visual_checklist_qa(proj: Path) -> Path | None:
-    """LLM defect-checklist pass over the strip sheets (needs agy)."""
+def _sheet(strips: list, out: Path, quality=72):
+    """Stack strips into one JPEG. Multi-megabyte PNG sheets time the
+    reviewer out, so batches are kept small and lossy."""
+    cmd = ["ffmpeg", "-y", "-v", "error"]
+    for s in strips:
+        cmd += ["-i", str(s)]
+    cmd += ["-filter_complex", f"vstack={len(strips)}" if len(strips) > 1
+            else "null", "-q:v", str(int(31 - quality * 0.29)), str(out)]
+    subprocess.run(cmd, check=True)
+
+
+def _review_batch(sheet: Path, prompt: str, cwd: Path, timeout=900):
+    try:
+        r = subprocess.run(["agy", "--sandbox", "--dangerously-skip-permissions",
+                            "-p", prompt], capture_output=True, text=True,
+                           timeout=timeout, cwd=cwd)
+        if r.returncode == 0 and r.stdout.strip():
+            return r.stdout.strip()
+        return f"(batch {sheet.name} did not run: exit {r.returncode})"
+    except subprocess.TimeoutExpired:
+        return f"(batch {sheet.name} timed out after {timeout}s)"
+    except FileNotFoundError:
+        return "(agy not installed — visual checklist skipped)"
+
+
+def visual_checklist_qa(proj: Path, batch=5) -> Path | None:
+    """LLM defect-checklist pass over the strips, reviewed in small batches."""
     review = proj / "review"
     bounds = sorted((review / "boundaries").glob("boundary_*.png"))
     dense = sorted((review / "dense").glob("dense_*.png"))
-    if not bounds or not dense:
+    if not bounds and not dense:
         return None
-    _vstack(bounds, review / "boundaries_sheet.png")
-    _vstack(dense, review / "dense_sheet.png")
-    report = proj / "qa_visual_report.md"
-    try:
-        r = subprocess.run(
-            ["agy", "--sandbox", "--dangerously-skip-permissions",
-             "-p", CHECKLIST],
-            capture_output=True, text=True, timeout=2400, cwd=review)
-        if r.returncode != 0 or not r.stdout.strip():
-            report.write_text(f"# Visual checklist DID NOT RUN\n\n"
-                              f"exit {r.returncode}\n\n{r.stderr[-2000:]}\n")
-            print(f"!! visual checklist QA failed (exit {r.returncode})")
-        else:
-            report.write_text(r.stdout)
-    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-        report.write_text(f"visual checklist QA unavailable: {e}\n")
+    report, out = proj / "qa_visual_report.md", ["# Visual continuity checklist", ""]
+    jobs = [("dense", dense, DENSE_PROMPT), ("boundary", bounds, BOUND_PROMPT)]
+    for kind, strips, prompt in jobs:
+        for i in range(0, len(strips), batch):
+            chunk = strips[i:i + batch]
+            sheet = review / f"qa_{kind}_{i // batch + 1}.jpg"
+            _sheet(chunk, sheet)
+            names = ", ".join(s.stem.replace(f"{kind}_", "") for s in chunk)
+            body = prompt.format(sheet=sheet.name, rows=names)
+            out += [f"## {kind} batch {i // batch + 1} ({names})",
+                    _review_batch(sheet, body, review), ""]
+            print(f"  reviewed {kind} batch {i // batch + 1}")
+    report.write_text("\n".join(out) + "\n")
     return report
 
 
