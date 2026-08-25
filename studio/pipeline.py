@@ -26,6 +26,40 @@ BLENDER = "/Applications/Blender.app/Contents/MacOS/Blender"
 STAGES = ["wireframes", "render", "proxies", "assemble", "mix", "qa", "audit"]
 
 
+def write_json(path: Path, data) -> bool:
+    """Bookkeeping writes land on the SMB share; if the NAS drops, losing the
+    manifest must not also lose the run that produced it."""
+    try:
+        path.write_text(json.dumps(data, indent=1))
+        return True
+    except OSError as e:
+        print(f"  (could not write {path.name}: {e})")
+        local = Path.home() / "StudioProxies" / path.parent.name / path.name
+        try:
+            local.parent.mkdir(parents=True, exist_ok=True)
+            local.write_text(json.dumps(data, indent=1))
+            print(f"  (kept a local copy at {local})")
+        except OSError:
+            pass
+        return False
+
+
+def share_online(proj: Path, remount=True) -> bool:
+    """True if the project share is really mounted. An unmounted share leaves
+    an empty local directory behind, so existence alone proves nothing."""
+    root = proj.parent
+    if root.is_mount() or (root.is_dir() and any(root.iterdir())):
+        return True
+    if not remount:
+        return False
+    script = Path(__file__).resolve().parent.parent / \
+        "deploy/macos/mount_shares.sh"
+    if sys.platform == "darwin" and script.is_file():
+        print("  share is not mounted — attempting remount…")
+        subprocess.run(["bash", str(script)], capture_output=True, timeout=120)
+    return root.is_mount() or (root.is_dir() and any(root.iterdir()))
+
+
 def notify(msg):
     """Notification text can come from LLM output (QA verdicts, audit
     summaries), so it must never be interpolated into the AppleScript source:
@@ -333,9 +367,9 @@ def stage_render(proj, shots, rv, a):
                     notify(f"{sid} MISSING — completed but clip never synced")
                     missing.append(sid)
                 break
-    (proj / "render_manifest.json").write_text(json.dumps(
-        {"rendered": [s["id"] for s in shots if s["id"] not in missing],
-         "missing": missing}, indent=1))
+    write_json(proj / "render_manifest.json",
+               {"rendered": [s["id"] for s in shots if s["id"] not in missing],
+                "missing": missing})
     if missing:
         FAILURES.append(("render", f"missing shots: {', '.join(missing)}"))
         notify(f"render INCOMPLETE — missing {', '.join(missing)}")
@@ -501,9 +535,9 @@ def stage_assemble(proj, shots, rv, a):
                     "-shortest", str(draft)], check=True)
     # Record what actually made the cut: QA derives boundary timestamps from
     # this, not from shots.json, so skipped shots can't shift every strip.
-    (proj / "cut_manifest.json").write_text(json.dumps(
-        {"shots": kept, "durs": durs, "xfade": XFV,
-         "dropped": dropped, "total": total}, indent=1))
+    write_json(proj / "cut_manifest.json",
+               {"shots": kept, "durs": durs, "xfade": XFV,
+                "dropped": dropped, "total": total})
     if dropped:
         FAILURES.append(("assemble", f"dropped shots: {', '.join(dropped)}"))
         notify(f"assemble INCOMPLETE — dropped {', '.join(dropped)}")
@@ -603,6 +637,12 @@ def main(argv=None):
     a.project = st.safe_project(a.project)
 
     proj = st.projects_root() / a.project
+    if not share_online(proj):
+        sys.exit(f"✗ {proj.parent} is not mounted and could not be remounted.\n"
+                 f"  The NAS looks offline — check that it is powered on and "
+                 f"reachable (ping 192.168.68.131), then re-run.\n"
+                 f"  Nothing was changed; local proxies under ~/StudioProxies "
+                 f"are unaffected.")
     shots = load_shots(proj)
     rv = Review(proj, a.project)
 
