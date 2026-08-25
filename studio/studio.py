@@ -74,7 +74,17 @@ def safe_project(name: str) -> str:
 
 
 def projects_root() -> Path:
-    """The Active_Projects share as mounted on THIS machine."""
+    """The Active_Projects share as mounted on THIS machine.
+
+    STUDIO_PROJECTS_ROOT overrides it, so the back half of the pipeline
+    (assemble/mix/qa) can run entirely off local disk while the NAS is down;
+    renders reach ComfyUI over HTTP and never need the share."""
+    override = CFG.get("STUDIO_PROJECTS_ROOT") or os.environ.get("STUDIO_PROJECTS_ROOT")
+    if override:
+        p = Path(override).expanduser()
+        if not p.is_dir():
+            sys.exit(f"STUDIO_PROJECTS_ROOT={p} is not a directory")
+        return p
     sysname = platform.system().lower()
     if sysname == "darwin":
         for p in (Path(PATH_MAP["darwin"]), Path(PATH_MAP["darwin_alt"])):
