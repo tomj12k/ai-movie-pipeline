@@ -296,10 +296,19 @@ def stage_assemble(proj, shots, rv, a):
             capture_output=True, text=True).stdout.strip())
         src = ["-i", str(clip)] if has_audio else \
               ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
+        # Two passes: this ffmpeg's loudnorm truncates downstream filters'
+        # EOF (~90ms short), so normalize first, then pad against a silence
+        # bed in a clean graph for an exactly video-length segment.
+        aud_ln = work / f"ln_{shot['id']}.wav"
         subprocess.run(["ffmpeg", "-y", "-v", "error"] + src +
-                       ["-t", f"{dur:.4f}",
-                        "-af", "loudnorm=I=-18:TP=-1.5:LRA=9,apad",
-                        "-ar", "48000", "-ac", "2", str(aud)], check=True)
+                       ["-vn", "-t", f"{dur:.4f}",
+                        "-af", "loudnorm=I=-18:TP=-1.5:LRA=9",
+                        "-ar", "48000", "-ac", "2", str(aud_ln)], check=True)
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(aud_ln),
+                        "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+                        "-filter_complex",
+                        f"[1:a]atrim=0:{dur:.4f}[s];[0:a][s]amix=inputs=2:duration=longest:normalize=0[out]",
+                        "-map", "[out]", "-t", f"{dur:.4f}", str(aud)], check=True)
         segs.append(seg); auds.append(aud); durs.append(dur)
 
     # Video: 0.2s crossfade at every boundary. Chained shots start where the
