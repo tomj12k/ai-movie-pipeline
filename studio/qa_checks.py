@@ -129,8 +129,9 @@ open that path directly, do NOT search the filesystem for it. Each row is \
 one scene ({rows}), sampled left to right across time. For EVERY row, first \
 COUNT the characters visible in each frame and say the count. Then flag: (1) \
 any frame containing three or more characters, or a clone/duplicate/ghost; (2) \
-Niko's ears going floppy, drooping, or rounded like a puppy's instead of tall \
-and upright; (3) eye rings becoming dashed, segmented, or dial-like instead of \
+Niko's ears CHANGING SHAPE into short, rounded or stubby puppy-like ears — \
+long pointed ears bending or leaning with head movement is correct animation, \
+not a defect; (3) eye rings becoming dashed, segmented, or dial-like instead of \
 solid rings; (4) the tail changing shape or size; (5) two characters merging, \
 fusing or overlapping into one shape; (6) background elements popping in or \
 out between frames of the same row; (7) any break into flat 2D or anime style. \
@@ -241,10 +242,14 @@ sampled across one shot of an animated film, left to right in time. {cast}
 
 Answer in this exact form and nothing else:
 COUNT: <the number of characters in each frame, comma separated>
-DESIGN: OK, or a short phrase naming any frame where the main character's ears \
-are floppy/drooping instead of tall and upright, the eye rings are dashed or \
-dial-like instead of solid rings, the face-screen is missing, or two characters \
-merge into one shape.
+DESIGN: OK, or a short phrase naming any frame with a real design change. \
+Judge the SHAPE of the ears, not their angle: long pointed ears that bend, \
+lean or swing as the head moves are correct animation and are NOT a defect — \
+only report ears whose shape has changed into short, rounded, stubby or \
+puppy-like ears. Also report a frame where the eye rings are dashed, \
+segmented or dial-like instead of solid rings, where the dark face-screen is \
+missing from the front of the head, or where two characters merge into a \
+single shape.
 VERDICT: PASS if every frame shows the expected cast and the design holds, \
 otherwise FAIL."""
 
