@@ -640,7 +640,7 @@ def main(argv=None):
     if not share_online(proj):
         sys.exit(f"✗ {proj.parent} is not mounted and could not be remounted.\n"
                  f"  The NAS looks offline — check that it is powered on and "
-                 f"reachable (ping 192.168.68.131), then re-run.\n"
+                 f"reachable (ping 192.168.68.139), then re-run.\n"
                  f"  Nothing was changed; local proxies under ~/StudioProxies "
                  f"are unaffected.")
     shots = load_shots(proj)

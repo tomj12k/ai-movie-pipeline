@@ -57,7 +57,7 @@ def load_env():
 
 CFG = load_env()
 SPARK = CFG.get("SPARK_HOST", "spark-d1a9.local")
-NAS = CFG.get("NAS_HOST", "192.168.68.131")
+NAS = CFG.get("NAS_HOST", "192.168.68.139")
 VLLM_URL = CFG.get("VLLM_URL", f"http://{SPARK}:8000/v1")
 COMFY_URL = CFG.get("COMFYUI_URL", f"http://{SPARK}:8188")
 
