@@ -241,15 +241,25 @@ path directly, do NOT search the filesystem for it. It is the final frame of a \
 shot in an animated film, and the next shot continues from it.
 
 Describe ONLY the camera framing, in one sentence of at most 25 words, so the \
-next shot can open the same way. Cover: how large the characters appear (tiny \
-and distant, small in frame, mid-shot, close-up, or extreme close-up), where \
-they sit in the frame (left, centre, right), which way they face (toward camera, \
-away from camera, in profile), and their body pose (standing, walking, sitting, \
-lying). Write it as a plain descriptive phrase with no preamble, for example: \
-"Two tiny distant figures seen from behind, standing together on a hill crest, \
-small in the lower centre of frame."
+next shot can open the same way. Cover: shot size (extreme wide, wide, mid-shot, \
+close-up, extreme close-up), where the subject sits in the frame (left, centre, \
+right, lower, upper), which way it faces (toward camera, away from camera, in \
+profile), and its pose (standing, walking, sitting, lying).
+
+CRITICAL: do NOT name or describe what the subjects are. Never use the words \
+character, characters, figure, figures, person, people, child, children, boy, \
+girl, man, woman, animal, or any species or creature name. Describe only the \
+composition. Write "Wide shot, subject small in lower centre, facing away from \
+camera, walking" — never "Two small figures walking away".
 
 Output the sentence and nothing else."""
+
+# Any subject noun that slips through gets rendered literally: an anchor reading
+# "A character in mid-shot" made the model paint generic characters (human
+# children) into a film whose only cast is a robot bunny and his companion.
+_SUBJECT_WORDS = re.compile(
+    r"\b(characters?|figures?|persons?|people|child(?:ren)?|boys?|girls?|"
+    r"men|man|women|woman|humans?|kids?|creatures?|animals?)\b", re.I)
 
 
 def describe_framing(img: Path, timeout=300) -> str:
@@ -269,6 +279,7 @@ def describe_framing(img: Path, timeout=300) -> str:
             return ""
         line = " ".join(r.stdout.strip().split())
         line = re.sub(r'^["\'`]|["\'`]$', "", line).strip()
+        line = _SUBJECT_WORDS.sub("subject", line)
         # keep it short; a long ramble would crowd out the character block
         return line[:220] if 10 < len(line) < 400 else ""
     except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
