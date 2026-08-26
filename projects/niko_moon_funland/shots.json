@@ -1,0 +1,702 @@
+[
+ {
+  "id": "arrival01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "moon_seed.png",
+  "seed": 4001,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. A grey lunar ridge above a vast crater.hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Niko drives his little moon buggy up over the ridge and stops at the crest. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: buggy motor hum, tyres on dust, a soft brake squeak."
+ },
+ {
+  "id": "arrival02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4002,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. A grey lunar ridge above a vast crater.hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. The camera looks past him down into the crater at a huge amusement park full of coasters and a Ferris wheel. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: wind hiss, distant park music box chimes, faint mechanical rumble."
+ },
+ {
+  "id": "arrival03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4003,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. A grey lunar ridge above a vast crater.hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. A tall entrance sign reads FBI BUNNY MOON FUNLAND with EVERY RIDE IS DEFINITELY SAFE underneath. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: sign electrical buzz, a flickering neon tick, quiet lunar wind."
+ },
+ {
+  "id": "arrival04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4004,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. A grey lunar ridge above a vast crater.hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Niko turns to the small toy sitting in the passenger seat and gives it a flat look. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: seat creak, a soft toy squeak, radio static crackle."
+ },
+ {
+  "id": "gate01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4005,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park gate, tall and brightly lit, with a changeable message sign.hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. A radio crackles on the dashboard and Niko glances at it, unimpressed. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: radio squelch, a tinny voice, buggy idle."
+ },
+ {
+  "id": "gate02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4006,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park gate, tall and brightly lit, with a changeable message sign.hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. The gate sign flickers and changes to read WELCOME NIKO in bright letters. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: sign relay clunk, bulbs popping on, cheerful chime."
+ },
+ {
+  "id": "gate03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4007,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park gate, tall and brightly lit, with a changeable message sign.hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. Niko grins, hits the accelerator and drives through the open gate. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: motor revving, tyres spinning in dust, gate whoosh past."
+ },
+ {
+  "id": "coaster01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4008,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A towering roller coaster called THE CARROT COMET inside a glass dome. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. Niko walks up to the empty ride entrance and looks up at the enormous track. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: footsteps on metal grating, distant ride clanks, echo."
+ },
+ {
+  "id": "coaster02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4009,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A towering roller coaster called THE CARROT COMET inside a glass dome. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. Agent Flopsy stands beside the ride in a small operator hat with his arms crossed. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: a huffy little cough, boots on metal, lever clunk."
+ },
+ {
+  "id": "coaster03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4010,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A towering roller coaster called THE CARROT COMET inside a glass dome. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. Niko climbs into the coaster car and the safety bar drops down with a click. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: restraint hiss, solid click, seat creak."
+ },
+ {
+  "id": "coaster04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4011,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A towering roller coaster called THE CARROT COMET inside a glass dome. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. The train climbs the lift hill and Earth appears through the glass dome above. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: chain lift clicking steadily, rising hum, faint wind."
+ },
+ {
+  "id": "coaster05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4012,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A towering roller coaster called THE CARROT COMET inside a glass dome. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. The train stops at the very top and the whole track section rotates upside down. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: motor grinding, heavy rotation clunk, a startled beep."
+ },
+ {
+  "id": "coaster06",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4013,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A towering roller coaster called THE CARROT COMET inside a glass dome. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. The coaster races backward through a loop with Niko laughing. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: roaring wheels, rushing wind, delighted laughter."
+ },
+ {
+  "id": "coaster07",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4014,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A towering roller coaster called THE CARROT COMET inside a glass dome. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. The track splits three ways ahead with buttons labelled LEFT RIGHT and CARROT. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: clattering wheels, urgent warning beeps, switch relay."
+ },
+ {
+  "id": "coaster08",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4015,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A towering roller coaster called THE CARROT COMET inside a glass dome. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. One continuous shot, no cuts. Niko presses CARROT and the car drops through a hidden maintenance tunnel to the exit. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: trapdoor bang, whooshing drop, arrival bell ding."
+ },
+ {
+  "id": "buggies01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4016,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A crater arena of small bumper buggies under bright floodlights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. A dozen little bumper buggies sit still, then all turn to face Niko at once. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: servo whirs turning in unison, floodlight hum."
+ },
+ {
+  "id": "buggies02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4017,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A crater arena of small bumper buggies under bright floodlights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko climbs into the nearest buggy and it beeps to life. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: seat thump, power-up chirp, idle motor."
+ },
+ {
+  "id": "buggies03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4018,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A crater arena of small bumper buggies under bright floodlights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The other buggies charge and one clips his side, lifting him in the low gravity. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: impact bonk, rubber squeal, weightless whoosh."
+ },
+ {
+  "id": "buggies04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4019,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A crater arena of small bumper buggies under bright floodlights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko bounces off a padded wall and sails over two other buggies. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: boing off padding, airy float, cheering whoop."
+ },
+ {
+  "id": "buggies05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4020,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A crater arena of small bumper buggies under bright floodlights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Three buggies box him in and he spots a dashboard button marked HORN. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: circling motors, closing-in whirr, a tense beep."
+ },
+ {
+  "id": "buggies06",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4021,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A crater arena of small bumper buggies under bright floodlights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. He presses the horn and every robot buggy immediately backs away. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: loud honk, warning chime, servos reversing."
+ },
+ {
+  "id": "buggies07",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4022,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A crater arena of small bumper buggies under bright floodlights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko drives straight through the parting buggies holding the horn down. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: sustained honking, tyres on plating, laughter."
+ },
+ {
+  "id": "ferris01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4023,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A giant Ferris wheel of clear bubble cabins turning slowly above the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko steps into a clear bubble cabin and the door seals behind him. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: door seal hiss, latch clunk, quiet interior tone."
+ },
+ {
+  "id": "ferris02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4024,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A giant Ferris wheel of clear bubble cabins turning slowly above the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The wheel turns and Earth glows on the horizon beyond the glass. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: slow mechanical turning, gentle creak, calm hum."
+ },
+ {
+  "id": "ferris03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4025,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A giant Ferris wheel of clear bubble cabins turning slowly above the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. At the top the bubble detaches from the wheel with a sharp click. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: release clack, sudden silence, a worried beep."
+ },
+ {
+  "id": "ferris04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4026,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A giant Ferris wheel of clear bubble cabins turning slowly above the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The bubble rolls down a rail and out onto the lunar surface as a giant ball. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: rolling rumble, rail clatter, rushing air."
+ },
+ {
+  "id": "ferris05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4027,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A giant Ferris wheel of clear bubble cabins turning slowly above the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. It bounces across the dust in long slow low-gravity hops. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: soft boing, dust puff, floaty whoosh."
+ },
+ {
+  "id": "ferris06",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4028,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A giant Ferris wheel of clear bubble cabins turning slowly above the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The ball drops into a crater, sweeps around the bottom and launches off the far side. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: deep whoosh, rising pitch, weightless hang."
+ },
+ {
+  "id": "ferris07",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4029,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A giant Ferris wheel of clear bubble cabins turning slowly above the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko floats inside the bubble at the top of its arc, delighted. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: muffled float tone, a happy laugh, faint wind."
+ },
+ {
+  "id": "ferris08",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4030,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A giant Ferris wheel of clear bubble cabins turning slowly above the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. He grabs steering paddles, takes a maintenance ramp and bounces past the control booth waving. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: paddle clicks, ramp launch, glass rattle, startled shout."
+ },
+ {
+  "id": "manor01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4031,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A dark haunted house called MOON MONSTER MANOR with flickering green lights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko stops outside the entrance and reads the sign with deep suspicion. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: green light buzz, spooky wind loop, door creak."
+ },
+ {
+  "id": "manor02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4032,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A dark haunted house called MOON MONSTER MANOR with flickering green lights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Inside, a green costumed creature leaps out and Niko does not flinch. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: screech, jump-scare clatter, unimpressed beep."
+ },
+ {
+  "id": "manor03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4033,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A dark haunted house called MOON MONSTER MANOR with flickering green lights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The costume opens to reveal a small robot bunny looking disappointed. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: costume hinge squeak, deflated whirr, tiny sigh."
+ },
+ {
+  "id": "manor04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4034,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A dark haunted house called MOON MONSTER MANOR with flickering green lights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. A three-headed beast appears and turns out to be three robot bunnies stacked up. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: triple roar, wobbling servos, comic tumble."
+ },
+ {
+  "id": "manor05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4035,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A dark haunted house called MOON MONSTER MANOR with flickering green lights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. A real twenty-foot six-legged mechanical monster rises ahead in the corridor. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: heavy thumping steps, deep mechanical roar, dust fall."
+ },
+ {
+  "id": "manor06",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4036,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A dark haunted house called MOON MONSTER MANOR with flickering green lights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko runs, ducking under claws and sliding beneath a closing door. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: running footsteps, claw swipes, door slam, slide scrape."
+ },
+ {
+  "id": "manor07",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4037,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A dark haunted house called MOON MONSTER MANOR with flickering green lights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Cornered, he spots a small sign on the monster's leg about stopping for guests. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: monster idle rumble, panicked breath, a quiet realisation beep."
+ },
+ {
+  "id": "manor08",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4038,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A dark haunted house called MOON MONSTER MANOR with flickering green lights. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko steps calmly into its path and the monster halts inches away. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: emergency brake screech, hydraulic hiss, silence."
+ },
+ {
+  "id": "drop01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4039,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A very tall thin drop tower with a row of outward-facing seats. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko sits in a drop-tower seat and looks up the enormous tower. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: harness lock, tower hum, nervous beep."
+ },
+ {
+  "id": "drop02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4040,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A very tall thin drop tower with a row of outward-facing seats. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The seats shoot upward and the whole moon base spreads out below. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: pneumatic whoosh, rushing ascent, wind."
+ },
+ {
+  "id": "drop03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4041,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A very tall thin drop tower with a row of outward-facing seats. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. They hang at the top for a long moment. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: creaking cable, quiet wind, a held breath."
+ },
+ {
+  "id": "drop04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4042,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A very tall thin drop tower with a row of outward-facing seats. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The seats fall slowly in low gravity and Niko looks unimpressed. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: gentle descent whoosh, floaty tone, flat beep."
+ },
+ {
+  "id": "drop05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4043,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A very tall thin drop tower with a row of outward-facing seats. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Hidden thrusters fire and slam the seats down, up and sideways while Niko screams and laughs. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: thruster blast, violent whoosh, screaming laughter."
+ },
+ {
+  "id": "funhouse01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4044,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A mirrored funhouse with tilting floors and moving mirror walls. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko steps inside and his reflection stretches tall and then tiny. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: warbling mirror tone, floor tilt creak, footstep echo."
+ },
+ {
+  "id": "funhouse02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4045,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A mirrored funhouse with tilting floors and moving mirror walls. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The mirrors begin sliding and close into a shifting maze around him. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: grinding mirror tracks, glass rattle, confusion beep."
+ },
+ {
+  "id": "funhouse03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4046,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A mirrored funhouse with tilting floors and moving mirror walls. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. He walks into a mirror with a soft bonk and rubs his head. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: gentle bonk, glass wobble, comic ding."
+ },
+ {
+  "id": "funhouse04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4047,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A mirrored funhouse with tilting floors and moving mirror walls. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The floor turns slippery and a padded hammer swings past his head. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: slipping scuffle, hammer whoosh, dodge grunt."
+ },
+ {
+  "id": "funhouse05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4048,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A mirrored funhouse with tilting floors and moving mirror walls. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. A moving walkway carries him toward a pie cannon that swivels to aim. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: conveyor hum, cannon servo, loading clunk."
+ },
+ {
+  "id": "funhouse06",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4049,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A mirrored funhouse with tilting floors and moving mirror walls. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. The cannon fires and a pie splatters across the mirror behind him. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: cannon fwomp, wet splat, cream drip."
+ },
+ {
+  "id": "funhouse07",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4050,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. A mirrored funhouse with tilting floors and moving mirror walls. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. One continuous shot, no cuts. Niko throws pies at every mirror until only the real openings stay clear. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: repeated splats, quick footsteps, triumphant beep."
+ },
+ {
+  "id": "final01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4051,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. An unmarked black roller coaster train at the back of the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Agent Flopsy waits beside a plain black coaster train with no sign or lights. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: low ominous hum, coaster tick, a proud little cough."
+ },
+ {
+  "id": "final02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4052,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. An unmarked black roller coaster train at the back of the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Niko climbs in and buckles the small stuffed toy into the seat beside him. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: harness click, toy squeak, seat creak."
+ },
+ {
+  "id": "final03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4053,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. An unmarked black roller coaster train at the back of the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. The train accelerates into an underground tunnel. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: sudden acceleration, tunnel roar, rushing wind."
+ },
+ {
+  "id": "final04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4054,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. An unmarked black roller coaster train at the back of the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. It twists sideways through a wall of red laser beams. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: laser hum, whipping air, warning chirps."
+ },
+ {
+  "id": "final05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4055,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. An unmarked black roller coaster train at the back of the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. The car races through a shallow pool throwing water everywhere. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: big splash, spraying water, delighted yell."
+ },
+ {
+  "id": "final06",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4056,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. An unmarked black roller coaster train at the back of the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. The car detaches from the rails and becomes a moon buggy in a moving maze. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: clunking release, tyres gripping, maze walls sliding."
+ },
+ {
+  "id": "final07",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4057,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. An unmarked black roller coaster train at the back of the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. It locks back onto rails, climbs, and stops in a dark room lit by one lamp. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: rail clunk, slow climb, echoing stop, single lamp buzz."
+ },
+ {
+  "id": "final08",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4058,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. An unmarked black roller coaster train at the back of the park. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. A single spoon sits on a small table in the light and Niko reaches for it. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: quiet room tone, a tempting chime, careful movement."
+ },
+ {
+  "id": "spoon01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4059,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. The dark trap room, cages, and the coaster car under a single lamp. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Four transparent cages drop one after another around the coaster car. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: four heavy clangs, echoing metal, triumphant laughter."
+ },
+ {
+  "id": "spoon02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4060,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. The dark trap room, cages, and the coaster car under a single lamp. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Agent Flopsy walks up to the cages looking extremely pleased with himself. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: confident footsteps, smug chuckle, camera shutter."
+ },
+ {
+  "id": "spoon03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4061,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. The dark trap room, cages, and the coaster car under a single lamp. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Niko squeezes the stuffed toy and pulls off its tiny hoodie. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: toy squeak, fabric rustle, a small realisation beep."
+ },
+ {
+  "id": "spoon04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4062,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. The dark trap room, cages, and the coaster car under a single lamp. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. A hotel keycard is taped underneath the toy's souvenir tag. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: tape peel, card tap, quiet reveal chime."
+ },
+ {
+  "id": "spoon05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4063,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. The dark trap room, cages, and the coaster car under a single lamp. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Niko slides the card into a slot beside the seat and a control screen lights up. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: card swipe beep, screen power-on, system chirp."
+ },
+ {
+  "id": "spoon06",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4064,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. The dark trap room, cages, and the coaster car under a single lamp. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Every cage unlocks and lifts in sequence while Flopsy stares. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: four unlocking clangs, rising servos, stunned silence."
+ },
+ {
+  "id": "escape01",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4065,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park midway and the entrance gate beyond it. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Niko grabs the spoon and runs through the park with Flopsy bouncing after him. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: running footsteps, bouncing thumps, indignant shouting."
+ },
+ {
+  "id": "escape02",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4066,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park midway and the entrance gate beyond it. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Cotton follows behind in a tiny park cart eating a snack. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: small electric cart whine, crunching snack, calm hum."
+ },
+ {
+  "id": "escape03",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4067,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park midway and the entrance gate beyond it. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Niko jumps into his moon buggy at the gate and Flopsy skids to a stop beside it. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: seat thump, motor start, skidding dust."
+ },
+ {
+  "id": "escape04",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4068,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park midway and the entrance gate beyond it. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. The park score sign flickers to read NIKO 20 and FLOPSY 0. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: sign relay clunks, bulbs flickering, sad descending chime."
+ },
+ {
+  "id": "escape05",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4069,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park midway and the entrance gate beyond it. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Niko drives away across the lunar plain with the toy in the passenger seat. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: motor pulling away, tyres on dust, receding shout."
+ },
+ {
+  "id": "escape06",
+  "trim_frames": 120,
+  "workflow": "krea2_ltx25_lora",
+  "input_image": "chain",
+  "seed": 4070,
+  "krea_denoise": 0.55,
+  "style_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. Lunar surface under a black starry sky with Earth low on the horizon. The park midway and the entrance gate beyond it. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. ",
+  "motion_prompt": "Soft 3D CGI animated feature-film render, rounded glossy materials, bright playful lighting, family-friendly comedy. hnk_niko, Niko is a small white robot bunny with a glossy dark face-screen showing two solid glowing yellow ring eyes, long pointed ears with cyan light-strips, a cyan chest ring and a small white puff tail. Agent Flopsy is a stocky grey-brown rabbit in a small dark FBI suit with a tiny badge and round dark sunglasses. Agent Cotton is a slimmer cream-coloured rabbit in a matching dark FBI suit, calmer and usually holding a snack. Stuffed Flopsy is a small soft toy version of Agent Flopsy wearing a tiny grey hacker hoodie. One continuous shot, no cuts. Far out on the plain he squeezes the toy and looks back at the distant park lights. Audio: sound effects and foley only, strictly no music, no score, no melody, no synth pads, no humming: soft toy squeak, quiet wind, a contented laugh."
+ }
+]
